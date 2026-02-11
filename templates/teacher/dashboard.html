@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="navbar">
+        <h1>👨‍🏫 Teacher Dashboard</h1>
+        <div class="user-info">
+            <span>{{ session.full_name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-grid">
+        <div class="sidebar">
+            <a href="{{ url_for('teacher_dashboard') }}" class="menu-item active">📊 Overview</a>
+            <a href="{{ url_for('teacher_mark_attendance') }}" class="menu-item">✅ Mark Attendance</a>
+            <a href="{{ url_for('teacher_view_attendance') }}" class="menu-item">👁️ View Records</a>
+            <a href="{{ url_for('teacher_summary') }}" class="menu-item">📈 Summary</a>
+        </div>
+
+        <div class="content-area">
+            <h2>Welcome, {{ session.full_name }}</h2>
+            <p class="subtitle">Subject: {{ session.subject }}</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>{{ stats.students }}</h3>
+                    <p>Total Students</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ stats.classes }}</h3>
+                    <p>Classes Conducted</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ stats.avg_attendance }}%</h3>
+                    <p>Average Attendance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

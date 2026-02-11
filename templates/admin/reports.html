@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="navbar">
+        <h1>📚 Admin Dashboard</h1>
+        <div class="user-info">
+            <span>{{ session.full_name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-grid">
+        <div class="sidebar">
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-item">📊 Overview</a>
+            <a href="{{ url_for('admin_teachers') }}" class="menu-item">👨‍🏫 Teachers</a>
+            <a href="{{ url_for('admin_students') }}" class="menu-item">👨‍🎓 Students</a>
+            <a href="{{ url_for('admin_reports') }}" class="menu-item active">📈 Reports</a>
+        </div>
+
+        <div class="content-area">
+            <h2>Attendance Reports</h2>
+
+            <form method="GET" action="{{ url_for('admin_reports') }}">
+                <div class="form-group">
+                    <label>Select Teacher</label>
+                    <select name="teacher_id" required>
+                        <option value="">Choose a teacher</option>
+                        {% for teacher in teachers %}
+                        <option value="{{ teacher.id }}" {% if selected_teacher and selected_teacher.id == teacher.id %}selected{% endif %}>
+                            {{ teacher.full_name }} - {{ teacher.subject_assigned }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Generate Report</button>
+            </form>
+
+            {% if summary %}
+            <div class="report-content">
+                <h3>Report for {{ selected_teacher.full_name }}</h3>
+                <p>Subject: {{ selected_teacher.subject_assigned }}</p>
+
+                {% for student_id, data in summary.items() %}
+                <div class="summary-section">
+                    <h4>{{ data.serial_no }}. {{ data.name }} ({{ data.prn }})</h4>
+                    <div class="summary-item">
+                        <span>Theory</span>
+                        <span>{{ data.theory.attended }}/{{ data.theory.total }} ({{ data.theory.percentage }}%)</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Practical</span>
+                        <span>{{ data.practical.attended }}/{{ data.practical.total }} ({{ data.practical.percentage }}%)</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Tutorial</span>
+                        <span>{{ data.tutorial.attended }}/{{ data.tutorial.total }} ({{ data.tutorial.percentage }}%)</span>
+                    </div>
+                    <div class="summary-item">
+                        <strong>Overall</strong>
+                        <strong class="{% if data.overall.percentage >= 75 %}text-success{% elif data.overall.percentage >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                            {{ data.overall.attended }}/{{ data.overall.total }} ({{ data.overall.percentage }}%)
+                        </strong>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

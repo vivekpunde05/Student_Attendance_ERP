@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="navbar">
+        <h1>👨‍🏫 Teacher Dashboard</h1>
+        <div class="user-info">
+            <span>{{ session.full_name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-grid">
+        <div class="sidebar">
+            <a href="{{ url_for('teacher_dashboard') }}" class="menu-item">📊 Overview</a>
+            <a href="{{ url_for('teacher_mark_attendance') }}" class="menu-item active">✅ Mark Attendance</a>
+            <a href="{{ url_for('teacher_view_attendance') }}" class="menu-item">👁️ View Records</a>
+            <a href="{{ url_for('teacher_summary') }}" class="menu-item">📈 Summary</a>
+        </div>
+
+        <div class="content-area">
+            <h2>Mark Attendance</h2>
+
+            <form method="POST">
+                <div class="form-group">
+                    <label>Session Type</label>
+                    <select name="session_type" required>
+                        <option value="theory">Theory</option>
+                        <option value="practical">Practical</option>
+                        <option value="tutorial">Tutorial</option>
+                    </select>
+                </div>
+
+                <div class="attendance-grid">
+                    {% for student in students %}
+                    <div class="attendance-row">
+                        <div>
+                            <strong>{{ student.serial_no }}. {{ student.name }}</strong><br>
+                            <small>{{ student.prn }}</small>
+                        </div>
+                        <div class="attendance-controls">
+                            <label class="radio-btn">
+                                <input type="radio" name="status_{{ student.id }}" value="present" required>
+                                <span class="btn-present">Present</span>
+                            </label>
+                            <label class="radio-btn">
+                                <input type="radio" name="status_{{ student.id }}" value="absent" required>
+                                <span class="btn-absent">Absent</span>
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn btn-success">Submit Attendance</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

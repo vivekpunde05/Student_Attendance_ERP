@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}View Attendance{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="navbar">
+        <h1>👨‍🏫 Teacher Dashboard</h1>
+        <div class="user-info">
+            <span>{{ session.full_name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-grid">
+        <div class="sidebar">
+            <a href="{{ url_for('teacher_dashboard') }}" class="menu-item">📊 Overview</a>
+            <a href="{{ url_for('teacher_mark_attendance') }}" class="menu-item">✅ Mark Attendance</a>
+            <a href="{{ url_for('teacher_view_attendance') }}" class="menu-item active">👁️ View Records</a>
+            <a href="{{ url_for('teacher_summary') }}" class="menu-item">📈 Summary</a>
+        </div>
+
+        <div class="content-area">
+            <h2>Attendance Records</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Student</th>
+                        <th>PRN</th>
+                        <th>Session</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.time }}</td>
+                        <td>{{ record.name }}</td>
+                        <td>{{ record.prn }}</td>
+                        <td>{{ record.session_type }}</td>
+                        <td>
+                            <span class="badge badge-{{ record.status }}">{{ record.status }}</span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('teacher_delete_attendance', att_id=record.id) }}" 
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Delete this record?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

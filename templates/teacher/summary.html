@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Student Summary{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="navbar">
+        <h1>👨‍🏫 Teacher Dashboard</h1>
+        <div class="user-info">
+            <span>{{ session.full_name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-grid">
+        <div class="sidebar">
+            <a href="{{ url_for('teacher_dashboard') }}" class="menu-item">📊 Overview</a>
+            <a href="{{ url_for('teacher_mark_attendance') }}" class="menu-item">✅ Mark Attendance</a>
+            <a href="{{ url_for('teacher_view_attendance') }}" class="menu-item">👁️ View Records</a>
+            <a href="{{ url_for('teacher_summary') }}" class="menu-item active">📈 Summary</a>
+        </div>
+
+        <div class="content-area">
+            <h2>Student Summary</h2>
+
+            {% for student_id, data in summary.items() %}
+            <div class="summary-section">
+                <h3>{{ data.serial_no }}. {{ data.name }} ({{ data.prn }})</h3>
+                <div class="summary-item">
+                    <span>Theory</span>
+                    <span>{{ data.theory.attended }}/{{ data.theory.total }} ({{ data.theory.percentage }}%)</span>
+                </div>
+                <div class="summary-item">
+                    <span>Practical</span>
+                    <span>{{ data.practical.attended }}/{{ data.practical.total }} ({{ data.practical.percentage }}%)</span>
+                </div>
+                <div class="summary-item">
+                    <span>Tutorial</span>
+                    <span>{{ data.tutorial.attended }}/{{ data.tutorial.total }} ({{ data.tutorial.percentage }}%)</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Overall</strong>
+                    <strong class="percentage {% if data.overall.percentage >= 75 %}good{% elif data.overall.percentage >= 50 %}warning{% else %}poor{% endif %}">
+                        {{ data.overall.attended }}/{{ data.overall.total }} ({{ data.overall.percentage }}%)
+                    </strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

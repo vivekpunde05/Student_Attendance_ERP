@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Students{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="navbar">
+        <h1>📚 Admin Dashboard</h1>
+        <div class="user-info">
+            <span>{{ session.full_name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-grid">
+        <div class="sidebar">
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-item">📊 Overview</a>
+            <a href="{{ url_for('admin_teachers') }}" class="menu-item">👨‍🏫 Teachers</a>
+            <a href="{{ url_for('admin_students') }}" class="menu-item active">👨‍🎓 Students</a>
+            <a href="{{ url_for('admin_reports') }}" class="menu-item">📈 Reports</a>
+        </div>
+
+        <div class="content-area">
+            <h2>Manage Students</h2>
+            <button class="btn btn-primary" onclick="showModal()">+ Add Student</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Serial No</th>
+                        <th>PRN</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.serial_no }}</td>
+                        <td>{{ student.prn }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_delete_student', student_id=student.id) }}" 
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Are you sure?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add Student</h2>
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+        </div>
+        <form method="POST" action="{{ url_for('admin_add_student') }}">
+            <div class="form-group">
+                <label>Serial Number</label>
+                <input type="number" name="serial_no" required>
+            </div>
+            <div class="form-group">
+                <label>PRN</label>
+                <input type="text" name="prn" required>
+            </div>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Student</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showModal() {
+        document.getElementById('addModal').style.display = 'flex';
+    }
+    function closeModal() {
+        document.getElementById('addModal').style.display = 'none';
+    }
+</script>
+{% endblock %}

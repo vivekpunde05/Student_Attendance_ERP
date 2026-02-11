@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="navbar">
+        <h1>👨‍🎓 Student Dashboard</h1>
+        <div class="user-info">
+            <span>{{ session.full_name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="content-area">
+        <h2>My Attendance</h2>
+
+        <div class="summary-section">
+            <div class="summary-item">
+                <span><strong>Overall Attendance</strong></span>
+                <span class="percentage {% if stats.overall.percentage >= 75 %}good{% elif stats.overall.percentage >= 50 %}warning{% else %}poor{% endif %}">
+                    {{ stats.overall.percentage }}%
+                </span>
+            </div>
+            <div class="summary-item">
+                <span>Theory Classes</span>
+                <span class="percentage {% if stats.theory.percentage >= 75 %}good{% elif stats.theory.percentage >= 50 %}warning{% else %}poor{% endif %}">
+                    {{ stats.theory.percentage }}%
+                </span>
+            </div>
+            <div class="summary-item">
+                <span>Practical Sessions</span>
+                <span class="percentage {% if stats.practical.percentage >= 75 %}good{% elif stats.practical.percentage >= 50 %}warning{% else %}poor{% endif %}">
+                    {{ stats.practical.percentage }}%
+                </span>
+            </div>
+            <div class="summary-item">
+                <span>Tutorial Sessions</span>
+                <span class="percentage {% if stats.tutorial.percentage >= 75 %}good{% elif stats.tutorial.percentage >= 50 %}warning{% else %}poor{% endif %}">
+                    {{ stats.tutorial.percentage }}%
+                </span>
+            </div>
+        </div>
+
+        <h3>Attendance History</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Subject</th>
+                    <th>Session Type</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.time }}</td>
+                    <td>{{ record.subject }}</td>
+                    <td>{{ record.session_type }}</td>
+                    <td>
+                        <span class="badge badge-{{ record.status }}">{{ record.status }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
