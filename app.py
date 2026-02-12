@@ -5,9 +5,10 @@ from admin import *
 from teacher import *
 from student import *
 from functools import wraps
+import os
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-change-this-in-production' 
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production') 
 
 # Initialize database
 def setup():
@@ -213,5 +214,6 @@ def student_dashboard():
 
 
 if __name__ == '__main__':
+    import os
     setup()  
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
