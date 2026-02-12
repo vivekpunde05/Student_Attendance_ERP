@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables from .env file (for local development)
 load_dotenv()
 
 DB_CONFIG = {
@@ -14,3 +14,6 @@ DB_CONFIG = {
     "ssl_verify_cert": False,  # Set to False for Aiven without CA cert file
     "ssl_verify_identity": False
 }
+
+# Debug: Print config (without password) to verify environment variables are loaded
+print(f"DB Config - Host: {DB_CONFIG['host']}, User: {DB_CONFIG['user']}, Database: {DB_CONFIG['database']}, Port: {DB_CONFIG['port']}")
