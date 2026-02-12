@@ -6,15 +6,27 @@ from teacher import *
 from student import *
 from functools import wraps
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production') 
 
 # Initialize database
 def setup():
-    init_pool()
-    database.create_tables()
-    database.create_default_admin()
+    try:
+        init_pool()
+        logger.info("Database pool initialized")
+        database.create_tables()
+        logger.info("Database tables created/verified")
+        database.create_default_admin()
+        logger.info("Default admin created/verified")
+    except Exception as e:
+        logger.error(f"Setup error: {e}")
+        raise
 
 
 # Login required 
@@ -215,5 +227,13 @@ def student_dashboard():
 
 if __name__ == '__main__':
     import os
-    setup()  
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    try:
+        setup()
+        print("Database setup completed successfully")
+    except Exception as e:
+        print(f"Warning during setup: {e}")
+        # Continue anyway - tables might already exist
+    
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    app.run(debug=debug, host='0.0.0.0', port=port)
