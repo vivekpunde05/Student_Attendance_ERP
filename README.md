@@ -2,6 +2,8 @@
 
 A comprehensive web-based attendance management system built with Flask and MySQL, deployed on Render with Aiven MySQL database.
 
+**Last Updated:** February 15, 2026
+
 ## Features
 
 ### Admin Dashboard
