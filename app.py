@@ -26,7 +26,15 @@ def setup():
         logger.info("Default admin created/verified")
     except Exception as e:
         logger.error(f"Setup error: {e}")
-        raise
+        # Don't raise - allow app to start even if DB setup fails
+        pass
+
+# Run setup when module is imported (for Gunicorn)
+try:
+    setup()
+    logger.info("Application setup completed")
+except Exception as e:
+    logger.error(f"Failed to setup application: {e}")
 
 
 # Login required 
@@ -43,6 +51,16 @@ def login_required(role=None):
     return decorator
 
 # Routes
+@app.route('/health')
+def health():
+    """Health check endpoint for monitoring"""
+    try:
+        from connection import execute
+        execute("SELECT 1", fetch=True)
+        return jsonify({"status": "healthy", "database": "connected"}), 200
+    except Exception as e:
+        return jsonify({"status": "unhealthy", "error": str(e)}), 500
+
 @app.route('/')
 def index():
     if 'user_id' in session:
