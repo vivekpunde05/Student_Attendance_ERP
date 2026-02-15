@@ -11,8 +11,8 @@ DB_CONFIG = {
     "database": os.environ.get("DB_NAME"),
     "port": int(os.environ.get("DB_PORT", "3306")),
     "ssl_disabled": False,
-    "ssl_verify_cert": False,  # Set to False for Aiven without CA cert file
-    "ssl_verify_identity": False
+    "connect_timeout": 30,
+    "autocommit": False
 }
 
 # Debug: Print config (without password) to verify environment variables are loaded

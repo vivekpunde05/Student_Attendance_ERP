@@ -76,39 +76,43 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        role = request.form.get('role')
+        try:
+            username = request.form.get('username')
+            password = request.form.get('password')
+            role = request.form.get('role')
 
-        if role == 'admin':
-            user = admin_login(username, password)
-            if user:
-                session['user_id'] = user['id']
-                session['username'] = user['username']
-                session['full_name'] = user['full_name']
-                session['role'] = 'admin'
-                return redirect(url_for('admin_dashboard'))
+            if role == 'admin':
+                user = admin_login(username, password)
+                if user:
+                    session['user_id'] = user['id']
+                    session['username'] = user['username']
+                    session['full_name'] = user['full_name']
+                    session['role'] = 'admin'
+                    return redirect(url_for('admin_dashboard'))
 
-        elif role == 'teacher':
-            user = teacher_login(username, password)
-            if user:
-                session['user_id'] = user['id']
-                session['username'] = user['username']
-                session['full_name'] = user['full_name']
-                session['subject'] = user['subject_assigned']
-                session['role'] = 'teacher'
-                return redirect(url_for('teacher_dashboard'))
+            elif role == 'teacher':
+                user = teacher_login(username, password)
+                if user:
+                    session['user_id'] = user['id']
+                    session['username'] = user['username']
+                    session['full_name'] = user['full_name']
+                    session['subject'] = user['subject_assigned']
+                    session['role'] = 'teacher'
+                    return redirect(url_for('teacher_dashboard'))
 
-        elif role == 'student':
-            user = get_student_by_prn(username)
-            if user:
-                session['user_id'] = user['id']
-                session['prn'] = user['prn']
-                session['full_name'] = user['name']
-                session['role'] = 'student'
-                return redirect(url_for('student_dashboard'))
+            elif role == 'student':
+                user = get_student_by_prn(username)
+                if user:
+                    session['user_id'] = user['id']
+                    session['prn'] = user['prn']
+                    session['full_name'] = user['name']
+                    session['role'] = 'student'
+                    return redirect(url_for('student_dashboard'))
 
-        flash('Invalid credentials', 'error')
+            flash('Invalid credentials', 'error')
+        except Exception as e:
+            logger.error(f"Login error: {e}")
+            flash('Database connection error. Please try again.', 'error')
 
     return render_template('login.html')
 
@@ -121,8 +125,13 @@ def logout():
 @app.route('/admin/dashboard')
 @login_required(role='admin')
 def admin_dashboard():
-    stats = get_statistics()
-    return render_template('admin/dashboard.html', stats=stats)
+    try:
+        stats = get_statistics()
+        return render_template('admin/dashboard.html', stats=stats)
+    except Exception as e:
+        logger.error(f"Admin dashboard error: {e}")
+        flash('Error loading dashboard. Please check database connection.', 'error')
+        return redirect(url_for('login'))
 
 @app.route('/admin/teachers')
 @login_required(role='admin')
