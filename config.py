@@ -11,6 +11,7 @@ DB_CONFIG = {
     "database": os.environ.get("DB_NAME"),
     "port": int(os.environ.get("DB_PORT", "3306")),
     "ssl_disabled": False,
+    "ssl_ca": None,  # Aiven works without CA cert if we don't verify
     "connect_timeout": 30,
     "autocommit": False
 }
