@@ -27,6 +27,14 @@ def list_teachers():
 def remove_teacher(teacher_id):
     execute("DELETE FROM teachers WHERE id=%s", (teacher_id,), commit=True)
 
+def change_admin_password(admin_id: int, new_password: str):
+    """Allow admin to change their own password"""
+    is_valid, error = utils.validate_password_length(new_password)
+    if not is_valid:
+        raise ValueError(error)
+    pw_hash = utils.hash_password(new_password)
+    execute("UPDATE admins SET password_hash = %s WHERE id = %s", (pw_hash, admin_id), commit=True)
+
 def add_student(serial_no, prn, name):
     execute("INSERT INTO students (serial_no,prn,name) VALUES (%s,%s,%s)",
             (serial_no, prn, name), commit=True)
