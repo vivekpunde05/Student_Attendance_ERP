@@ -25,6 +25,19 @@ def validate_password_length(password: str) -> tuple[bool, str]:
         return False, "Password must be at least 8 characters long"
     return True, ""
 
+def generate_secure_password(length: int = 12) -> str:
+    """Generate cryptographically secure random password using Python secrets library"""
+    import secrets
+    import string
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+    while True:
+        password = ''.join(secrets.choice(alphabet) for _ in range(length))
+        if (any(c.islower() for c in password)
+                and any(c.isupper() for c in password)
+                and any(c.isdigit() for c in password)
+                and any(c in "!@#$%^&*" for c in password)):
+            return password
+
 
 # Email imports for forgot password (lazy loaded)
 def _get_email_modules():
