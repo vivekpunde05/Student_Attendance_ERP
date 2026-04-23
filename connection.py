@@ -4,12 +4,13 @@ from config import DB_CONFIG
 
 _pool = None
 
-def init_pool(pool_size=5):
+def init_pool(pool_size=3):
     global _pool
     if _pool is None:
         _pool = mysql.connector.pooling.MySQLConnectionPool(
             pool_name="attendance_pool",
             pool_size=pool_size,
+            pool_reset_session=True,
             **DB_CONFIG
         )
 

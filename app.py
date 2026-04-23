@@ -7,13 +7,15 @@ from student import *
 from functools import wraps
 import os
 import logging
+from password_reset import password_reset_bp, create_reset_tokens_table
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production') 
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
+app.register_blueprint(password_reset_bp)
 
 # Initialize database
 def setup():
@@ -22,6 +24,8 @@ def setup():
         logger.info("Database pool initialized")
         database.create_tables()
         logger.info("Database tables created/verified")
+        create_reset_tokens_table()
+        logger.info("Password reset tables created/verified")
         database.create_default_admin()
         logger.info("Default admin created/verified")
     except Exception as e:

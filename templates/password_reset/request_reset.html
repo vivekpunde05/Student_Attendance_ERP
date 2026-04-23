@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Forgot Password - Attendance ERP{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <h2>🔑 Forgot Password</h2>
+        <p class="subtitle">Enter your registered email to receive a reset link</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('password_reset.forgot_password_v2') }}">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Send Reset Link</button>
+        </form>
+
+        <div class="form-links">
+            <a href="{{ url_for('login') }}">← Back to Login</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+.alert-success { background: #d4edda; color: #155724; }
+.alert-error { background: #f8d7da; color: #721c24; }
+.form-links { margin-top: 20px; text-align: center; }
+</style>
+{% endblock %}

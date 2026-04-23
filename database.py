@@ -8,6 +8,7 @@ def create_tables():
         username VARCHAR(50) UNIQUE,
         password_hash VARCHAR(512),
         full_name VARCHAR(100),
+        email VARCHAR(100) UNIQUE,
         reset_token VARCHAR(64) NULL,
         reset_expires TIMESTAMP NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -54,10 +55,27 @@ def create_tables():
     ) ENGINE=InnoDB;
     """, commit=True)
 
+def create_password_reset_tables():
+    """Create password_reset_tokens table for complete reset system"""
+    execute("""
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(100) NOT NULL,
+        token VARCHAR(64) UNIQUE NOT NULL,
+        user_type ENUM('admin','teacher') NOT NULL,
+        user_id INT NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        used BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_token (token),
+        INDEX idx_email (email)
+    ) ENGINE=InnoDB;
+    """, commit=True)
+
 def create_default_admin():
     r = execute("SELECT COUNT(*) as cnt FROM admins", fetch=True)
     if r and r[0]['cnt'] == 0:
         ph = utils.hash_password("admin123")
-        execute("INSERT INTO admins (username, password_hash, full_name) VALUES (%s,%s,%s)",
-                ("admin", ph, "Super Admin"), commit=True)
-        print("Default admin created: username=admin password=admin123")
+        execute("INSERT INTO admins (username, password_hash, full_name, email) VALUES (%s,%s,%s,%s)",
+                ("admin", ph, "Super Admin", "admin@attendance-erp.local"), commit=True)
+        print("Default admin created: username=admin password=admin123 email=admin@attendance-erp.local")
