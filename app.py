@@ -212,6 +212,57 @@ def reset_password(token):
     return render_template('reset_password.html', token=token)
 
 
+@app.route('/change-password', methods=['GET', 'POST'])
+@login_required()
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        role = session.get('role')
+        user_id = session['user_id']
+
+        if new_password != confirm_password:
+            flash('New passwords do not match', 'error')
+            return redirect(url_for('change_password'))
+
+        try:
+            if role == 'admin':
+                admin = execute("SELECT * FROM admins WHERE id = %s", (user_id,), fetch=True)
+                if admin and utils.verify_password(admin[0]['password_hash'], current_password):
+                    change_admin_password(user_id, new_password)
+                    flash('Password changed successfully! Please login again.', 'success')
+                    return redirect(url_for('logout'))
+                else:
+                    flash('Current password is incorrect', 'error')
+                    return redirect(url_for('change_password'))
+
+            elif role == 'teacher':
+                teacher = execute("SELECT * FROM teachers WHERE id = %s", (user_id,), fetch=True)
+                if teacher and utils.verify_password(teacher[0]['password_hash'], current_password):
+                    change_teacher_password(user_id, new_password)
+                    flash('Password changed successfully! Please login again.', 'success')
+                    return redirect(url_for('logout'))
+                else:
+                    flash('Current password is incorrect', 'error')
+                    return redirect(url_for('change_password'))
+
+            else:
+                flash('Password change not available for students', 'error')
+                return redirect(url_for('index'))
+
+        except ValueError as e:
+            flash(str(e), 'error')
+            return redirect(url_for('change_password'))
+        except Exception as e:
+            logger.error(f"Change password error: {e}")
+            flash('Error changing password', 'error')
+            return redirect(url_for('change_password'))
+
+    return render_template('change_password.html')
+
+
+# Admin Routes
 @app.route('/admin/dashboard')
 @login_required(role='admin')
 def admin_dashboard():

@@ -92,6 +92,14 @@ def overall_attendance_summary(teacher_id):
         }
     return summary
 
+def change_teacher_password(teacher_id: int, new_password: str):
+    """Allow teacher to change their own password"""
+    is_valid, error = utils.validate_password_length(new_password)
+    if not is_valid:
+        raise ValueError(error)
+    pw_hash = utils.hash_password(new_password)
+    execute("UPDATE teachers SET password_hash = %s WHERE id = %s", (pw_hash, teacher_id), commit=True)
+
 def get_teacher_statistics(teacher_id):
     students = execute("SELECT COUNT(*) as count FROM students", fetch=True)
 
