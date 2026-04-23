@@ -18,3 +18,12 @@ DB_CONFIG = {
 
 # Debug: Print config (without password) to verify environment variables are loaded
 print(f"DB Config - Host: {DB_CONFIG['host']}, User: {DB_CONFIG['user']}, Database: {DB_CONFIG['database']}, Port: {DB_CONFIG['port']}")
+
+# Email configuration for forgot password
+EMAIL_CONFIG = {
+    "smtp_server": os.environ.get("EMAIL_SMTP_SERVER", "smtp.gmail.com"),
+    "smtp_port": int(os.environ.get("EMAIL_SMTP_PORT", "587")),
+    "username": os.environ.get("EMAIL_USER"),
+    "password": os.environ.get("EMAIL_PASSWORD"),
+    "from_email": os.environ.get("EMAIL_FROM", "noreply@attendanceerp.com")
+}

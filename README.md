@@ -1,346 +1,174 @@
 # Student Attendance ERP System
 
-A comprehensive web-based attendance management system built with Flask and MySQL, deployed on Render with Aiven MySQL database.
+A comprehensive web-based attendance management system built with **Flask** and **MySQL**. Supports local development and cloud deployment (Render + Aiven MySQL).
 
-**Last Updated:** February 15, 2026 - Active Development & Maintenance
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.1.2-green.svg)](https://flask.palletsprojects.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
 
-## Features
+**Last Updated:** Current - Verified working locally with Aiven MySQL
 
-### Admin Dashboard
-- Manage teachers (Add, View, Delete)
-- Manage students (Add, View, Delete)
-- View system statistics
-- Generate attendance reports by teacher
+## 🚀 Quick Start (Local)
 
-### Teacher Dashboard
-- Mark attendance (Theory/Practical/Tutorial sessions)
-- View attendance records
-- Student-wise attendance summary with percentages
-- Update/Delete attendance records
+1. **Clone & Setup**
+   ```bash
+   git clone <repo-url>
+   cd Student_Attendance_ERP
+   ```
 
-### Student Dashboard
-- View personal attendance history
-- Session-wise attendance breakdown (Theory/Practical/Tutorial)
-- Overall attendance percentage
+2. **Virtual Environment**
+   ```powershell
+   python -m venv venv
+   venv\Scripts\activate  # Windows
+   # source venv/bin/activate  # Linux/Mac
+   ```
 
-## Tech Stack
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-- **Backend:** Flask (Python)
-- **Database:** MySQL (Aiven Cloud)
-- **Deployment:** Render
-- **Authentication:** Session-based with password hashing (PBKDF2)
-- **Frontend:** HTML, CSS, Jinja2 templates
+4. **Configure Database** (Aiven MySQL or local)
+   Create `.env`:
+   ```env
 
-## Live Demo
+ DB_HOST=your-host
+DB_USER=your-username
+DB_PASSWORD=your-password
+DB_NAME=your-db-name
+DB_PORT=your-port
+SECRET_KEY=your-secret-key
+   ```
 
-🔗 **Application URL:** [Your Render URL]
+5. **Test Connection**
+   ```bash
+   python test_connection.py
+   ```
 
-## Default Login Credentials
+6. **Run Server**
+   ```bash
+   python app.py
+   ```
+   **URL:** http://localhost:5000
 
-**Admin:**
-- Username: `admin`
-- Password: `admin123`
+## 👤 Default Login
 
-**Note:** Change the default password after first login. Add teachers and students through the admin panel.
+| Role   | Username | Password    |
+|--------|----------|-------------|
+| Admin  | `admin`  | `admin123`  |
 
-## Local Development Setup
+> **Note:** Add teachers/students via Admin panel first.
 
-### Prerequisites
+## ✨ Features
 
-- Python 3.11 or higher
-- pip (Python package manager)
-- Git
+### Admin
+- ✅ Add/View/Delete Teachers & Students
+- ✅ System statistics
+- ✅ Teacher-wise attendance reports
 
-### Installation Steps
+### Teacher
+- ✅ Mark attendance (Theory/Practical/Tutorial)
+- ✅ View records & summaries (%)
+- ✅ Delete incorrect entries
 
-1. **Clone the repository**
-```bash
-git clone https://github.com/vivekpunde05/Student_Attendance_ERP.git
-cd Student_Attendance_ERP
+### Student
+- ✅ Personal attendance history
+- ✅ Session-wise breakdown
+- ✅ Overall percentage
+
+## 🛠 Tech Stack
+
+| Component     | Tech              |
+|---------------|-------------------|
+| Backend       | Flask 3.1.2      |
+| Database      | MySQL 8.0 (Aiven)|
+| ORM           | mysql-connector  |
+| Auth          | PBKDF2 + Sessions|
+| Frontend      | HTML/CSS/Jinja2  |
+| Deployment    | Render           |
+
+## 🗄 Database Schema
+
+```sql
+admins(id, username, password_hash, full_name, created_at)
+teachers(id, username, password_hash, full_name, email, subject_assigned, created_at)
+students(id, serial_no, prn, name, created_at)
+attendance(id, student_id, teacher_id, subject, date, time, session_type, status, recorded_at)
 ```
 
-2. **Create virtual environment (optional but recommended)**
-```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
-```
+## ☁️ Cloud Deployment (Render)
 
-3. **Install dependencies**
-```bash
-pip install -r requirements.txt
-```
+1. Push to GitHub
+2. Connect repo at [render.com](https://render.com)
+3. Set env vars (same as `.env`)
+4. Auto-deploys via `render.yaml`
 
-4. **Configure environment variables**
+## 🔧 Troubleshooting
 
-Create a `.env` file in the root directory:
-```env
-DB_HOST=your_aiven_mysql_host
-DB_USER=avnadmin
-DB_PASSWORD=your_aiven_password
-DB_NAME=defaultdb
-DB_PORT=12087
-SECRET_KEY=your-secret-key-here
-```
+| Issue | Solution |
+|-------|----------|
+| DB Connection | Run `python test_connection.py` |
+| Port 5000 busy | Edit `app.py`: `port=5001` |
+| SSL Error | Ensure `ssl-mode=REQUIRED` in Aiven connection |
 
-5. **Test database connection**
-```bash
-python test_connection.py
-```
+**Server Logs:** Check terminal for `werkzeug` output.
 
-6. **Run the application**
-```bash
-python app.py
-```
-
-The application will be available at `http://localhost:5000`
-
-## Deployment on Render
-
-### Automatic Deployment
-
-This project includes `render.yaml` for automatic deployment:
-
-1. **Fork/Clone this repository**
-2. **Sign up on Render:** https://render.com
-3. **Create New Web Service:**
-   - Connect your GitHub repository
-   - Render will auto-detect `render.yaml`
-4. **Set Environment Variables:**
-   - `DB_HOST`: Your Aiven MySQL host
-   - `DB_USER`: avnadmin
-   - `DB_PASSWORD`: Your Aiven password
-   - `DB_NAME`: defaultdb
-   - `DB_PORT`: 12087
-   - `SECRET_KEY`: (Auto-generated by Render)
-5. **Deploy!**
-
-### Aiven MySQL Setup
-
-1. Sign up at https://console.aiven.io/
-2. Create a new MySQL service
-3. Copy connection details (host, port, user, password)
-4. Use these credentials in your `.env` or Render environment variables
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-Student_Attendance_ERP/
-├── app.py                    # Main Flask application
-├── config.py                 # Database configuration with dotenv
-├── connection.py             # MySQL connection pool management
-├── database.py               # Database schema and initialization
-├── utils.py                  # Utility functions (password hashing, date/time)
-├── admin.py                  # Admin module functions
-├── teacher.py                # Teacher module functions
-├── student.py                # Student module functions
-├── csv_handler.py            # CSV import/export functionality
-├── requirements.txt          # Python dependencies
-├── render.yaml               # Render deployment configuration
-├── build.sh                  # Build script for Render
-├── test_connection.py        # Database connection test script
-├── .env.example              # Environment variables template
-├── .gitignore                # Git ignore file
-├── README.md                 # This file
-├── templates/                # HTML templates
-│   ├── base.html
-│   ├── login.html
-│   ├── admin/
-│   │   ├── dashboard.html
-│   │   ├── teachers.html
-│   │   ├── students.html
-│   │   └── reports.html
-│   ├── teacher/
-│   │   ├── dashboard.html
-│   │   ├── mark_attendance.html
-│   │   ├── view_attendance.html
-│   │   └── summary.html
-│   └── student/
-│       └── dashboard.html
-└── static/                   # CSS, JS, images
-    └── style.css
+├── app.py           # Flask app
+├── config.py        # Env config
+├── connection.py    # MySQL pool
+├── database.py      # Schema init
+├── admin.py         # Admin logic
+├── teacher.py       # Teacher logic
+├── student.py       # Student logic
+├── utils.py         # Helpers
+├── templates/       # HTML
+├── static/          # CSS
+├── requirements.txt
+├── .env            # Secrets (gitignore)
+└── test_connection.py
 ```
 
-## Database Schema
+## 🔗 API Endpoints
 
-### Tables
-
-**admins**
-- id (Primary Key)
-- username (Unique)
-- password_hash
-- full_name
-- created_at
-
-**teachers**
-- id (Primary Key)
-- username (Unique)
-- password_hash
-- full_name
-- email
-- subject_assigned
-- created_at
-
-**students**
-- id (Primary Key)
-- serial_no
-- prn (Unique)
-- name
-- created_at
-
-**attendance**
-- id (Primary Key)
-- student_id (Foreign Key → students)
-- teacher_id (Foreign Key → teachers)
-- subject
-- date
-- time
-- session_type (theory/practical/tutorial)
-- status (present/absent)
-- recorded_at
-
-## Usage Guide
-
-### Admin Workflow
-
-1. **Login** with admin credentials
-2. **Add Teachers:**
-   - Navigate to "Teachers" section
-   - Click "Add Teacher"
-   - Fill in username, password, full name, email, and subject
-3. **Add Students:**
-   - Navigate to "Students" section
-   - Click "Add Student"
-   - Enter Serial No, PRN, and Name
-4. **View Reports:**
-   - Go to "Reports" section
-   - Select a teacher from dropdown
-   - View comprehensive attendance summary
-
-### Teacher Workflow
-
-1. **Login** with teacher credentials
-2. **Mark Attendance:**
-   - Go to "Mark Attendance"
-   - Select session type (Theory/Practical/Tutorial)
-   - Mark Present/Absent for each student
-   - Submit the form
-3. **View Records:**
-   - Navigate to "View Attendance"
-   - See all attendance records with date/time
-   - Delete incorrect records if needed
-4. **Check Summary:**
-   - Go to "Summary"
-   - View detailed breakdown by session type
-   - See attendance percentages for each student
-
-### Student Workflow
-
-1. **Login** with PRN number (no password required)
-2. **View Dashboard:**
-   - See attendance history
-   - Check session-wise statistics
-   - Monitor overall attendance percentage
-
-## API Endpoints
-
-### Authentication
-- `GET /` - Redirect to appropriate dashboard
-- `GET/POST /login` - Login page
-- `GET /logout` - Logout and clear session
-
-### Admin Routes
-- `GET /admin/dashboard` - Admin dashboard with statistics
-- `GET /admin/teachers` - List all teachers
-- `POST /admin/teachers/add` - Add new teacher
-- `GET /admin/teachers/delete/<id>` - Delete teacher
-- `GET /admin/students` - List all students
-- `POST /admin/students/add` - Add new student
-- `GET /admin/students/delete/<id>` - Delete student
-- `GET /admin/reports` - Attendance reports
-
-### Teacher Routes
-- `GET /teacher/dashboard` - Teacher dashboard
-- `GET/POST /teacher/mark-attendance` - Mark attendance
-- `GET /teacher/view-attendance` - View attendance records
-- `GET /teacher/attendance/delete/<id>` - Delete attendance record
-- `GET /teacher/summary` - Student attendance summary
-
-### Student Routes
-- `GET /student/dashboard` - Student dashboard with attendance
-
-## Security Features
-
-- Password hashing using PBKDF2-HMAC-SHA256
-- Session-based authentication
-- Role-based access control (Admin/Teacher/Student)
-- SSL/TLS encryption for database connections
-- Environment variables for sensitive data
-- CSRF protection via Flask sessions
-
-## Troubleshooting
-
-### Database Connection Error
-
-**Issue:** Can't connect to Aiven MySQL
-**Solution:**
-1. Verify credentials in `.env` file
-2. Check if Aiven service is running
-3. Ensure SSL is properly configured
-4. Run `python test_connection.py` to diagnose
-
-### Module Not Found Error
-
-```bash
-pip install --upgrade -r requirements.txt
+```
+Auth: /login, /logout
+Admin: /admin/dashboard, /admin/teachers, /admin/students, /admin/reports
+Teacher: /teacher/* (mark-attendance, view-attendance, summary)
+Student: /student/dashboard
+Health: /health
 ```
 
-### Port Already in Use (Local Development)
+## 📈 Usage Workflow
 
-Change the port in `app.py`:
-```python
-app.run(debug=True, host='0.0.0.0', port=5001)
+```
+Admin → Add Teacher/Student → Login Teacher → Mark Attendance → View Reports
+Student → Login PRN → Check Dashboard
 ```
 
-### Render Deployment Issues
+## 🤝 Contributing
 
-1. Check Render logs for errors
-2. Verify all environment variables are set
-3. Ensure `build.sh` has execute permissions
-4. Check database connectivity from Render
+1. Fork → Branch → Commit → PR
+2. Follow PEP8
+3. Update tests
+4. `git commit -m "feat: description"`
 
-## Environment Variables
+## 📄 License
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DB_HOST` | Aiven MySQL host | `vivekpunde-vivekpunde.h.aivencloud.com` |
-| `DB_USER` | Database user | `avnadmin` |
-| `DB_PASSWORD` | Database password | `your_password` |
-| `DB_NAME` | Database name | `defaultdb` |
-| `DB_PORT` | Database port | `12087` |
-| `SECRET_KEY` | Flask secret key | `random-secret-string` |
+Educational use.
 
-## Contributing
+## 👨‍💻 Author
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+**Vivek Punde**  
+[GitHub](https://github.com/vivekpunde05)
 
-## License
+## ✅ Verified Setup
 
-This project is for educational purposes.
+- [x] Python 3.13 + venv
+- [x] Dependencies installed
+- [x] Aiven MySQL connected
+- [x] App running @ localhost:5000
+- [x] Default admin login works
 
-## Author
-
-**Vivek Punde**
-- GitHub: [@vivekpunde05](https://github.com/vivekpunde05)
-
-## Acknowledgments
-
-- Flask documentation
-- Aiven for cloud database hosting
-- Render for deployment platform

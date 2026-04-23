@@ -3,6 +3,9 @@ import utils
 from utils import *
 
 def teacher_login(username, password):
+    is_valid, error = utils.validate_password_length(password)
+    if not is_valid:
+        return None  # Silently reject short passwords
     r = execute("SELECT * FROM teachers WHERE username=%s", (username,), fetch=True)
     if not r:
         return None

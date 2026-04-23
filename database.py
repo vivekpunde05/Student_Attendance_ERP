@@ -8,6 +8,8 @@ def create_tables():
         username VARCHAR(50) UNIQUE,
         password_hash VARCHAR(512),
         full_name VARCHAR(100),
+        reset_token VARCHAR(64) NULL,
+        reset_expires TIMESTAMP NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB;
     """, commit=True)
@@ -20,6 +22,8 @@ def create_tables():
         full_name VARCHAR(100),
         email VARCHAR(100),
         subject_assigned VARCHAR(100),
+        reset_token VARCHAR(64) NULL,
+        reset_expires TIMESTAMP NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB;
     """, commit=True)

@@ -121,7 +121,97 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+from utils import generate_reset_token, send_reset_email
+from connection import execute
+import database
+from datetime import datetime, timedelta
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        role = request.form.get('role')
+
+        try:
+            if role == 'admin':
+                user = execute("SELECT * FROM admins WHERE username = %s", (username,), fetch=True)
+                if user:
+                    flash('Reset link sent for admin account! (Demo - check console)', 'success')
+                    token = generate_reset_token()
+                    print(f"Admin {username} reset token: http://localhost:5000/reset-password/{token}")
+                else:
+                    flash('Username not found', 'error')
+
+            elif role == 'teacher':
+                user = execute("SELECT * FROM teachers WHERE username = %s", (username,), fetch=True)
+                if user:
+                    user = user[0]
+                    if user.get('email') == email:
+                        token = generate_reset_token()
+                        expires = datetime.now() + timedelta(hours=1)
+                        execute("UPDATE teachers SET reset_token = %s, reset_expires = %s WHERE id = %s", 
+                               (token, expires, user['id']), commit=True)
+                        if send_reset_email(email, username, token):
+                            flash('Reset link sent to your email!', 'success')
+                        else:
+                            flash('Email sent (check console if no SMTP)', 'success')
+                    else:
+                        flash('Email mismatch', 'error')
+                else:
+                    flash('Teacher username not found. Add teacher first.', 'error')
+
+            else:
+                flash('Forgot password available for Admin/Teacher only.', 'error')
+
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'error')
+
+    return render_template('forgot_password.html', role=request.form.get('role') if request.method == 'POST' else None)
+
 # Admin Routes
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password != confirm_password:
+            flash('Passwords do not match', 'error')
+            return render_template('reset_password.html', token=token)
+        
+        is_valid, error = utils.validate_password_length(new_password)
+        if not is_valid:
+            flash(error, 'error')
+            return render_template('reset_password.html', token=token)
+        
+        # Check token for admin
+        admin = execute("SELECT * FROM admins WHERE reset_token = %s AND reset_expires > NOW()", (token,), fetch=True)
+        if admin:
+            admin = admin[0]
+            pw_hash = utils.hash_password(new_password)
+            execute("UPDATE admins SET password_hash = %s, reset_token = NULL, reset_expires = NULL WHERE id = %s", 
+                   (pw_hash, admin['id']), commit=True)
+            flash('Password reset successfully! Login with new password.', 'success')
+            return redirect(url_for('login'))
+        
+        # Check token for teacher
+        teacher = execute("SELECT * FROM teachers WHERE reset_token = %s AND reset_expires > NOW()", (token,), fetch=True)
+        if teacher:
+            teacher = teacher[0]
+            pw_hash = utils.hash_password(new_password)
+            execute("UPDATE teachers SET password_hash = %s, reset_token = NULL, reset_expires = NULL WHERE id = %s", 
+                   (pw_hash, teacher['id']), commit=True)
+            flash('Password reset successfully! Login with new password.', 'success')
+            return redirect(url_for('login'))
+        
+        flash('Invalid or expired reset link', 'error')
+        return render_template('reset_password.html', token=token)
+    
+    # GET: Show form
+    return render_template('reset_password.html', token=token)
+
+
 @app.route('/admin/dashboard')
 @login_required(role='admin')
 def admin_dashboard():
@@ -148,8 +238,11 @@ def admin_add_teacher():
     email = request.form.get('email')
     subject = request.form.get('subject')
 
-    add_teacher(username, password, full_name, email, subject)
-    flash('Teacher added successfully', 'success')
+    try:
+        add_teacher(username, password, full_name, email, subject)
+        flash('Teacher added successfully', 'success')
+    except ValueError as e:
+        flash(str(e), 'error')
     return redirect(url_for('admin_teachers'))
 
 @app.route('/admin/teachers/delete/<int:teacher_id>')

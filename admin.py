@@ -2,6 +2,9 @@ from connection import execute
 import utils
 
 def admin_login(username, password):
+    is_valid, error = utils.validate_password_length(password)
+    if not is_valid:
+        return None  # Silently reject short passwords
     r = execute("SELECT * FROM admins WHERE username = %s", (username,), fetch=True)
     if not r:
         return None
@@ -11,6 +14,9 @@ def admin_login(username, password):
     return None
 
 def add_teacher(username, password, full_name, email, subject):
+    is_valid, error = utils.validate_password_length(password)
+    if not is_valid:
+        raise ValueError(f"Invalid password: {error}")
     pw_hash = utils.hash_password(password)
     execute("INSERT INTO teachers (username,password_hash,full_name,email,subject_assigned) VALUES (%s,%s,%s,%s,%s)",
             (username, pw_hash, full_name, email, subject), commit=True)
