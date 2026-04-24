@@ -2,36 +2,48 @@ from connection import execute
 import utils
 from utils import *
 
+def get_teacher_by_id(teacher_id):
+    r = execute("SELECT * FROM teachers WHERE id=%s", (teacher_id,), fetch=True)
+    return r[0] if r else None
+
 def teacher_login(username, password):
-    is_valid, error = utils.validate_password_length(password)
-    if not is_valid:
-        return None  # Silently reject short passwords
     r = execute("SELECT * FROM teachers WHERE username=%s", (username,), fetch=True)
     if not r:
         return None
     teacher = r[0]
-    if utils.verify_password(teacher['password_hash'], password):
+    if teacher.get('password_hash') and utils.verify_password(teacher['password_hash'], password):
         return teacher
-    return None
+    raise ValueError("Incorrect password. Please enter the correct password.")
 
-def view_students():
+def view_students(class_name=None):
+    if class_name:
+        return execute("SELECT * FROM students WHERE class_name = %s ORDER BY serial_no", (class_name,), fetch=True)
     return execute("SELECT * FROM students ORDER BY serial_no", fetch=True)
 
-def mark_attendance(teacher_id, subject, session_type, attendance_list):
-    date = now_date_str()
+def mark_attendance(teacher_id, subject, session_type, attendance_list, date=None):
+    if date is None:
+        date = now_date_str()
     time = now_time_str()
     sql = """INSERT INTO attendance (student_id, teacher_id, subject, date, time, session_type, status)
              VALUES (%s,%s,%s,%s,%s,%s,%s)"""
     params = [(sid, teacher_id, subject, date, time, session_type, status) for sid, status in attendance_list]
     execute(sql, params, many=True, commit=True)
 
-def view_attendance(teacher_id):
-    q = """SELECT a.id, s.serial_no, s.prn, s.name, a.subject, a.date, a.time, a.session_type, a.status
-           FROM attendance a
-           JOIN students s ON a.student_id = s.id
-           WHERE a.teacher_id = %s
-           ORDER BY a.date DESC, a.time DESC"""
-    return execute(q, (teacher_id,), fetch=True)
+def view_attendance(teacher_id, session_type=None):
+    if session_type:
+        q = """SELECT a.id, s.serial_no, s.prn, s.name, a.subject, a.date, a.time, a.session_type, a.status
+               FROM attendance a
+               JOIN students s ON a.student_id = s.id
+               WHERE a.teacher_id = %s AND a.session_type = %s
+               ORDER BY a.date DESC, a.time DESC"""
+        return execute(q, (teacher_id, session_type), fetch=True)
+    else:
+        q = """SELECT a.id, s.serial_no, s.prn, s.name, a.subject, a.date, a.time, a.session_type, a.status
+               FROM attendance a
+               JOIN students s ON a.student_id = s.id
+               WHERE a.teacher_id = %s
+               ORDER BY a.date DESC, a.time DESC"""
+        return execute(q, (teacher_id,), fetch=True)
 
 def update_attendance(att_id, new_status):
     execute("UPDATE attendance SET status=%s WHERE id=%s", (new_status, att_id), commit=True)
@@ -39,7 +51,7 @@ def update_attendance(att_id, new_status):
 def delete_attendance(att_id):
     execute("DELETE FROM attendance WHERE id=%s", (att_id,), commit=True)
 
-def attendance_summary_by_type(teacher_id):
+def attendance_summary_by_type(teacher_id, class_name=None):
     query = """
         SELECT 
             s.id AS student_id,
@@ -52,10 +64,13 @@ def attendance_summary_by_type(teacher_id):
         FROM attendance a
         JOIN students s ON a.student_id = s.id
         WHERE a.teacher_id = %s
-        GROUP BY s.id, a.session_type
-        ORDER BY s.serial_no
     """
-    rows = execute(query, (teacher_id,), fetch=True)
+    params = [teacher_id]
+    if class_name:
+        query += " AND s.class_name = %s"
+        params.append(class_name)
+    query += " GROUP BY s.id, a.session_type ORDER BY s.serial_no"
+    rows = execute(query, tuple(params), fetch=True)
 
     summary = {}
     for r in rows:
@@ -72,18 +87,20 @@ def attendance_summary_by_type(teacher_id):
                 "tutorial": {"attended": 0, "total": 0, "percentage": 0},
             }
 
-        summary[sid][stype]["attended"] = r["attended"]
-        summary[sid][stype]["total"] = r["total_lectures"]
+        attended = int(r["attended"]) if r["attended"] is not None else 0
+        total = int(r["total_lectures"])
+        summary[sid][stype]["attended"] = attended
+        summary[sid][stype]["total"] = total
         summary[sid][stype]["percentage"] = (
-            round((r["attended"] / r["total_lectures"]) * 100, 2) if r["total_lectures"] > 0 else 0
+            round((attended / total) * 100, 2) if total > 0 else 0
         )
     return summary
 
 def overall_attendance_summary(teacher_id):
     summary = attendance_summary_by_type(teacher_id)
     for sid, data in summary.items():
-        total_lectures = data["theory"]["total"] + data["practical"]["total"] + data["tutorial"]["total"]
-        attended = data["theory"]["attended"] + data["practical"]["attended"] + data["tutorial"]["attended"]
+        total_lectures = int(data["theory"]["total"]) + int(data["practical"]["total"]) + int(data["tutorial"]["total"])
+        attended = int(data["theory"]["attended"]) + int(data["practical"]["attended"]) + int(data["tutorial"]["attended"])
         percentage = round((attended / total_lectures) * 100, 2) if total_lectures > 0 else 0
         data["overall"] = {
             "attended": attended,

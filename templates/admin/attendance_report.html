@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Report{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="navbar">
+        <h1>📚 Admin Dashboard</h1>
+        <div class="user-info">
+            <span>{{ session.full_name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-grid">
+        <div class="sidebar">
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-item">📊 Overview</a>
+            <a href="{{ url_for('admin_teachers') }}" class="menu-item">👨‍🏫 Teachers</a>
+            <a href="{{ url_for('admin_students') }}" class="menu-item">👨‍🎓 Students</a>
+            <a href="{{ url_for('admin_reports') }}" class="menu-item">📈 Reports</a>
+            <a href="{{ url_for('admin_attendance_report') }}" class="menu-item active">📄 PDF Report</a>
+            <a href="{{ url_for('change_password') }}" class="menu-item">🔐 Change Password</a>
+        </div>
+
+        <div class="content-area">
+            <h2>Generate Attendance Report (PDF)</h2>
+
+            <form method="GET" action="{{ url_for('admin_attendance_report') }}">
+                <div class="form-group">
+                    <label>Select Teacher</label>
+                    <select name="teacher_id" required onchange="this.form.submit()">
+                        <option value="">Choose a teacher</option>
+                        {% for teacher in teachers %}
+                        <option value="{{ teacher.id }}" {% if selected_teacher and selected_teacher.id == teacher.id %}selected{% endif %}>
+                            {{ teacher.full_name }} - {{ teacher.subject_assigned }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+
+            {% if summary %}
+            <div class="report-preview">
+                <h3>Preview: {{ selected_teacher.full_name }} — {{ selected_teacher.subject_assigned }}</h3>
+
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Sr. No</th>
+                            <th>PRN</th>
+                            <th>Student Name</th>
+                            <th>Theory</th>
+                            <th>Tutorial</th>
+                            <th>Practical</th>
+                            <th>Total</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student_id, data in summary.items() %}
+                        <tr class="{% if data.overall.percentage < 50 %}low-attendance{% endif %}">
+                            <td>{{ data.serial_no }}</td>
+                            <td>{{ data.prn }}</td>
+                            <td>{{ data.name }}</td>
+                            <td>{{ data.theory.attended }}/{{ data.theory.total }}</td>
+                            <td>{{ data.tutorial.attended }}/{{ data.tutorial.total }}</td>
+                            <td>{{ data.practical.attended }}/{{ data.practical.total }}</td>
+                            <td><strong>{{ data.overall.attended }}/{{ data.overall.total }}</strong></td>
+                            <td class="percentage {% if data.overall.percentage >= 75 %}good{% elif data.overall.percentage >= 50 %}warning{% else %}poor{% endif %}">
+                                {{ data.overall.percentage }}%
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="summary-box">
+                    <h3>Overall Summary</h3>
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <span>Total Students</span>
+                            <strong>{{ total_students }}</strong>
+                        </div>
+                        <div class="summary-card">
+                            <span>Average Attendance</span>
+                            <strong>{{ avg_percentage }}%</strong>
+                        </div>
+                        <div class="summary-card danger">
+                            <span>Low Attendance (<50%)</span>
+                            <strong>{{ low_count }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('admin_attendance_report') }}" class="report-actions">
+                    <input type="hidden" name="teacher_id" value="{{ selected_teacher.id }}">
+                    <button type="submit" class="btn btn-primary">📥 Generate & Download PDF</button>
+                </form>
+            </div>
+            {% elif selected_teacher %}
+            <div class="empty-state">
+                <p>No attendance data available for {{ selected_teacher.full_name }}.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.report-preview {
+    margin-top: 20px;
+}
+.report-preview h3 {
+    margin-bottom: 15px;
+    color: var(--color-text);
+}
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+.report-table th,
+.report-table td {
+    border: 1px solid var(--color-border);
+    padding: 10px;
+    text-align: center;
+}
+.report-table th {
+    background: var(--color-primary);
+    color: white;
+    font-weight: 600;
+}
+.report-table tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+.report-table tbody tr:hover {
+    background: #e2e8f0;
+}
+.report-table tbody tr.low-attendance {
+    background: #fee2e2;
+    color: #991b1b;
+}
+.report-table tbody tr.low-attendance:hover {
+    background: #fecaca;
+}
+.report-table td:nth-child(3) {
+    text-align: left;
+}
+.summary-box {
+    background: var(--color-bg);
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+.summary-box h3 {
+    margin-bottom: 15px;
+    color: var(--color-text);
+}
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+}
+.summary-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--color-border);
+}
+.summary-card.danger {
+    border-color: var(--color-danger);
+    background: #fef2f2;
+}
+.summary-card span {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 5px;
+}
+.summary-card strong {
+    font-size: 1.4rem;
+    color: var(--color-text);
+}
+.summary-card.danger strong {
+    color: var(--color-danger);
+}
+.report-actions {
+    margin-top: 25px;
+    text-align: center;
+}
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--color-text-secondary);
+}
+.empty-state p {
+    margin: 10px 0;
+}
+</style>
+{% endblock %}
+

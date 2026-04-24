@@ -18,10 +18,19 @@
             <a href="{{ url_for('teacher_mark_attendance') }}" class="menu-item">✅ Mark Attendance</a>
             <a href="{{ url_for('teacher_view_attendance') }}" class="menu-item active">👁️ View Records</a>
             <a href="{{ url_for('teacher_summary') }}" class="menu-item">📈 Summary</a>
+            <a href="{{ url_for('teacher_attendance_report') }}" class="menu-item">📄 Attendance Report</a>
         </div>
 
         <div class="content-area">
             <h2>Attendance Records</h2>
+
+            <div class="filter-bar">
+                <span>Filter by Session:</span>
+                <a href="{{ url_for('teacher_view_attendance') }}" class="filter-btn {% if not selected_session %}active{% endif %}">All</a>
+                <a href="{{ url_for('teacher_view_attendance', session_type='theory') }}" class="filter-btn {% if selected_session == 'theory' %}active{% endif %}">Theory</a>
+                <a href="{{ url_for('teacher_view_attendance', session_type='tutorial') }}" class="filter-btn {% if selected_session == 'tutorial' %}active{% endif %}">Tutorial</a>
+                <a href="{{ url_for('teacher_view_attendance', session_type='practical') }}" class="filter-btn {% if selected_session == 'practical' %}active{% endif %}">Practical</a>
+            </div>
 
             <table>
                 <thead>

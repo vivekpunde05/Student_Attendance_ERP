@@ -6,7 +6,7 @@
 <div class="login-container">
     <div class="login-card">
         <h2>🔑 Forgot Password</h2>
-        <p class="subtitle">Enter your registered email to receive a reset link</p>
+        <p class="subtitle">Enter your username and registered email to receive a reset link</p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -19,6 +19,11 @@
         {% endwith %}
 
         <form method="POST" action="{{ url_for('password_reset.forgot_password_v2') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
@@ -41,6 +46,8 @@
 }
 .alert-success { background: #d4edda; color: #155724; }
 .alert-error { background: #f8d7da; color: #721c24; }
+.alert-warning { background: #fff3cd; color: #856404; }
 .form-links { margin-top: 20px; text-align: center; }
 </style>
 {% endblock %}
+

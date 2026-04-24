@@ -2,16 +2,13 @@ from connection import execute
 import utils
 
 def admin_login(username, password):
-    is_valid, error = utils.validate_password_length(password)
-    if not is_valid:
-        return None  # Silently reject short passwords
     r = execute("SELECT * FROM admins WHERE username = %s", (username,), fetch=True)
     if not r:
         return None
     admin = r[0]
-    if utils.verify_password(admin['password_hash'], password):
+    if admin.get('password_hash') and utils.verify_password(admin['password_hash'], password):
         return admin
-    return None
+    raise ValueError("Incorrect password. Please enter the correct password.")
 
 def add_teacher(username, password, full_name, email, subject):
     is_valid, error = utils.validate_password_length(password)
@@ -35,16 +32,22 @@ def change_admin_password(admin_id: int, new_password: str):
     pw_hash = utils.hash_password(new_password)
     execute("UPDATE admins SET password_hash = %s WHERE id = %s", (pw_hash, admin_id), commit=True)
 
-def add_student(serial_no, prn, name):
-    execute("INSERT INTO students (serial_no,prn,name) VALUES (%s,%s,%s)",
-            (serial_no, prn, name), commit=True)
+def add_student(serial_no, prn, name, class_name=None):
+    execute("INSERT INTO students (serial_no,prn,name,class_name) VALUES (%s,%s,%s,%s)",
+            (serial_no, prn, name, class_name), commit=True)
 
 def update_student(student_id, name=None):
     if name:
         execute("UPDATE students SET name=%s WHERE id=%s", (name, student_id), commit=True)
 
-def list_students():
+def list_students(class_name=None):
+    if class_name:
+        return execute("SELECT * FROM students WHERE class_name = %s ORDER BY serial_no", (class_name,), fetch=True)
     return execute("SELECT * FROM students ORDER BY serial_no", fetch=True)
+
+def get_distinct_student_classes():
+    rows = execute("SELECT DISTINCT class_name FROM students WHERE class_name IS NOT NULL AND class_name != '' ORDER BY class_name", fetch=True)
+    return [r['class_name'] for r in rows]
 
 def remove_student(student_id):
     execute("DELETE FROM students WHERE id=%s", (student_id,), commit=True)

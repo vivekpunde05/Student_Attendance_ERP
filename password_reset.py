@@ -4,7 +4,7 @@ Features:
 - Email-based reset requests
 - Secure token generation (secrets module)
 - Token storage with expiry (30 min)
-- bcrypt password hashing
+- PBKDF2 password hashing (compatible with utils.py)
 - Single-use token invalidation
 - SMTP email sending
 - Full error handling
@@ -18,7 +18,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
-import bcrypt
+import utils
 from connection import execute
 
 # Create Blueprint
@@ -90,13 +90,24 @@ def delete_expired_tokens():
 
 def find_user_by_email(email: str):
     """Find admin or teacher by email. Returns (user_type, user_data) or (None, None)"""
-    # Check admin first
     admin = execute("SELECT * FROM admins WHERE email = %s", (email,), fetch=True)
     if admin:
         return 'admin', admin[0]
     
-    # Check teacher
     teacher = execute("SELECT * FROM teachers WHERE email = %s", (email,), fetch=True)
+    if teacher:
+        return 'teacher', teacher[0]
+    
+    return None, None
+
+
+def find_user_by_username_and_email(username: str, email: str):
+    """Find admin or teacher by both username and email. Returns (user_type, user_data) or (None, None)"""
+    admin = execute("SELECT * FROM admins WHERE username = %s AND email = %s", (username, email), fetch=True)
+    if admin:
+        return 'admin', admin[0]
+    
+    teacher = execute("SELECT * FROM teachers WHERE username = %s AND email = %s", (username, email), fetch=True)
     if teacher:
         return 'teacher', teacher[0]
     
@@ -111,21 +122,6 @@ def generate_secure_token(length: int = 32) -> str:
     """Generate cryptographically secure random token using secrets"""
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for _ in range(length))
-
-
-def hash_password_bcrypt(password: str) -> str:
-    """Hash password using bcrypt (adaptive, salt automatically included)"""
-    password_bytes = password.encode('utf-8')
-    salt = bcrypt.gensalt(rounds=12)
-    hashed = bcrypt.hashpw(password_bytes, salt)
-    return hashed.decode('utf-8')
-
-
-def verify_password_bcrypt(stored_hash: str, password: str) -> bool:
-    """Verify password against bcrypt hash"""
-    password_bytes = password.encode('utf-8')
-    stored_bytes = stored_hash.encode('utf-8')
-    return bcrypt.checkpw(password_bytes, stored_bytes)
 
 
 # ============================================================================
@@ -183,7 +179,6 @@ body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
         If you did not request this, please ignore this email.<br>
         Attendance ERP System
     </div>
-</div>
 </body>
 </html>"""
     
@@ -208,8 +203,8 @@ body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
 # ============================================================================
 
 def update_user_password(user_type: str, user_id: int, new_password: str):
-    """Update password with bcrypt hash for admin or teacher"""
-    hashed = hash_password_bcrypt(new_password)
+    """Update password with PBKDF2 hash (compatible with utils.py) for admin or teacher"""
+    hashed = utils.hash_password(new_password)
     if user_type == 'admin':
         execute("UPDATE admins SET password_hash = %s WHERE id = %s", (hashed, user_id), commit=True)
     elif user_type == 'teacher':
@@ -222,20 +217,21 @@ def update_user_password(user_type: str, user_id: int, new_password: str):
 
 @password_reset_bp.route('/forgot-password-v2', methods=['GET', 'POST'])
 def forgot_password_v2():
-    """Step 1: User enters email to request password reset"""
+    """Step 1: User enters username and email to request password reset"""
     if request.method == 'POST':
+        username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip().lower()
         
-        if not email:
-            flash('Please enter your email address', 'error')
+        if not username or not email:
+            flash('Please enter both username and email address', 'error')
             return redirect(url_for('password_reset.forgot_password_v2'))
         
-        # Find user by email
-        user_type, user = find_user_by_email(email)
+        # Find user by both username and email
+        user_type, user = find_user_by_username_and_email(username, email)
         
         if not user:
-            # Security: Don't reveal if email exists
-            flash('If this email is registered, you will receive a reset link shortly.', 'success')
+            # Security: Don't reveal if user exists
+            flash('If the username and email match our records, you will receive a reset link shortly.', 'success')
             return redirect(url_for('password_reset.forgot_password_v2'))
         
         try:
@@ -303,7 +299,7 @@ def reset_password_v2():
             return render_template('password_reset/do_reset.html', token=token)
         
         try:
-            # Update password with bcrypt
+            # Update password with PBKDF2 hash (compatible with utils.py)
             update_user_password(record['user_type'], record['user_id'], new_password)
             
             # Invalidate token (single-use)

@@ -35,6 +35,7 @@ def create_tables():
         serial_no INT,
         prn VARCHAR(50) UNIQUE,
         name VARCHAR(120),
+        class_name VARCHAR(50),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB;
     """, commit=True)
@@ -71,6 +72,15 @@ def create_password_reset_tables():
         INDEX idx_email (email)
     ) ENGINE=InnoDB;
     """, commit=True)
+
+def migrate_students_add_class():
+    """Add class_name column to students table if it doesn't exist (for existing DBs)."""
+    try:
+        execute("ALTER TABLE students ADD COLUMN class_name VARCHAR(50)", commit=True)
+        print("✅ Migrated: Added class_name column to students table")
+    except Exception as e:
+        # Column likely already exists
+        pass
 
 def create_default_admin():
     r = execute("SELECT COUNT(*) as cnt FROM admins", fetch=True)

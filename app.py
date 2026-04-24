@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash, send_file
 from connection import init_pool
 import database
 from admin import *
@@ -8,6 +8,7 @@ from functools import wraps
 import os
 import logging
 from password_reset import password_reset_bp, create_reset_tokens_table
+import pdf_generator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +25,8 @@ def setup():
         logger.info("Database pool initialized")
         database.create_tables()
         logger.info("Database tables created/verified")
+        database.migrate_students_add_class()
+        logger.info("Student class column migrated")
         create_reset_tokens_table()
         logger.info("Password reset tables created/verified")
         database.create_default_admin()
@@ -93,6 +96,9 @@ def login():
                     session['full_name'] = user['full_name']
                     session['role'] = 'admin'
                     return redirect(url_for('admin_dashboard'))
+                else:
+                    flash('Admin username not found. Please enter the correct username.', 'error')
+                    return render_template('login.html')
 
             elif role == 'teacher':
                 user = teacher_login(username, password)
@@ -103,6 +109,9 @@ def login():
                     session['subject'] = user['subject_assigned']
                     session['role'] = 'teacher'
                     return redirect(url_for('teacher_dashboard'))
+                else:
+                    flash('Teacher username not found. Please enter the correct username.', 'error')
+                    return render_template('login.html')
 
             elif role == 'student':
                 user = get_student_by_prn(username)
@@ -112,8 +121,13 @@ def login():
                     session['full_name'] = user['name']
                     session['role'] = 'student'
                     return redirect(url_for('student_dashboard'))
+                else:
+                    flash('Student PRN not found. Please enter the correct PRN.', 'error')
+                    return render_template('login.html')
 
-            flash('Invalid credentials', 'error')
+        except ValueError as e:
+            flash(str(e), 'error')
+            return render_template('login.html')
         except Exception as e:
             logger.error(f"Login error: {e}")
             flash('Database connection error. Please try again.', 'error')
@@ -310,8 +324,11 @@ def admin_delete_teacher(teacher_id):
 @app.route('/admin/students')
 @login_required(role='admin')
 def admin_students():
-    students = list_students()
-    return render_template('admin/students.html', students=students)
+    selected_class = request.args.get('class_name', 'all')
+    class_filter = None if selected_class == 'all' else selected_class
+    students = list_students(class_name=class_filter)
+    classes = get_distinct_student_classes()
+    return render_template('admin/students.html', students=students, classes=classes, selected_class=selected_class)
 
 @app.route('/admin/students/add', methods=['POST'])
 @login_required(role='admin')
@@ -319,8 +336,9 @@ def admin_add_student():
     serial_no = request.form.get('serial_no')
     prn = request.form.get('prn')
     name = request.form.get('name')
+    class_name = request.form.get('class_name')
 
-    add_student(serial_no, prn, name)
+    add_student(serial_no, prn, name, class_name)
     flash('Student added successfully', 'success')
     return redirect(url_for('admin_students'))
 
@@ -355,9 +373,16 @@ def teacher_dashboard():
 @app.route('/teacher/mark-attendance', methods=['GET', 'POST'])
 @login_required(role='teacher')
 def teacher_mark_attendance():
+    selected_class = request.args.get('class_name', 'all')
+    class_filter = None if selected_class == 'all' else selected_class
+
     if request.method == 'POST':
         session_type = request.form.get('session_type')
-        students = view_students()
+        date = request.form.get('date')
+        # Use the same class filter that was shown in the form
+        post_class = request.form.get('selected_class_name', 'all')
+        class_filter_post = None if post_class == 'all' else post_class
+        students = view_students(class_name=class_filter_post)
         attendance_list = []
 
         for student in students:
@@ -365,18 +390,21 @@ def teacher_mark_attendance():
             if status:
                 attendance_list.append((student['id'], status))
 
-        mark_attendance(session['user_id'], session['subject'], session_type, attendance_list)
+        mark_attendance(session['user_id'], session['subject'], session_type, attendance_list, date=date)
         flash('Attendance marked successfully', 'success')
         return redirect(url_for('teacher_view_attendance'))
 
-    students = view_students()
-    return render_template('teacher/mark_attendance.html', students=students)
+    students = view_students(class_name=class_filter)
+    classes = get_distinct_student_classes()
+    today = datetime.now().strftime('%Y-%m-%d')
+    return render_template('teacher/mark_attendance.html', students=students, classes=classes, selected_class=selected_class, today=today)
 
 @app.route('/teacher/view-attendance')
 @login_required(role='teacher')
 def teacher_view_attendance():
-    records = view_attendance(session['user_id'])
-    return render_template('teacher/view_attendance.html', records=records)
+    session_type = request.args.get('session_type')
+    records = view_attendance(session['user_id'], session_type=session_type)
+    return render_template('teacher/view_attendance.html', records=records, selected_session=session_type)
 
 @app.route('/teacher/attendance/delete/<int:att_id>')
 @login_required(role='teacher')
@@ -395,9 +423,166 @@ def teacher_summary():
 @app.route('/student/dashboard')
 @login_required(role='student')
 def student_dashboard():
-    records = student_view(session['prn'])
-    stats = get_student_statistics(session['prn'])
-    return render_template('student/dashboard.html', records=records, stats=stats)
+    prn = session['prn']
+    selected_subject = request.args.get('subject', 'all')
+    selected_session = request.args.get('session_type', 'all')
+
+    # Resolve filters
+    subject_filter = None if selected_subject == 'all' else selected_subject
+    session_filter = None if selected_session == 'all' else selected_session
+
+    # Fetch data
+    subjects = get_student_subjects(prn)
+    records = get_student_attendance_filtered(prn, subject=subject_filter, session_type=session_filter)
+    raw_subject_stats = get_student_statistics_by_subject(prn, subject=subject_filter)
+    grand_total = raw_subject_stats.pop('__grand_total__', None) if raw_subject_stats else None
+    subject_stats = raw_subject_stats if raw_subject_stats else None
+
+    # Fallback to basic stats if no subject-level data
+    basic_stats = get_student_statistics(prn) if not subject_stats else None
+
+    return render_template(
+        'student/dashboard.html',
+        records=records,
+        subjects=subjects,
+        selected_subject=selected_subject,
+        selected_session=selected_session,
+        subject_stats=subject_stats,
+        grand_total=grand_total,
+        basic_stats=basic_stats
+    )
+
+
+@app.route('/student/attendance-data')
+@login_required(role='student')
+def student_attendance_data():
+    """JSON endpoint for Chart.js graphs."""
+    prn = session['prn']
+    selected_subject = request.args.get('subject', 'all')
+    subject_filter = None if selected_subject == 'all' else selected_subject
+
+    stats = get_student_statistics_by_subject(prn, subject=subject_filter)
+    grand_total = stats.pop('__grand_total__', None) if stats else None
+
+    # Prepare chart data
+    labels = list(stats.keys())
+    overall_pcts = [stats[s]['overall']['percentage'] for s in labels]
+    theory_pcts = [stats[s]['theory']['percentage'] for s in labels]
+    practical_pcts = [stats[s]['practical']['percentage'] for s in labels]
+    tutorial_pcts = [stats[s]['tutorial']['percentage'] for s in labels]
+
+    present_counts = [stats[s]['overall']['present'] for s in labels]
+    absent_counts = [stats[s]['overall']['total'] - stats[s]['overall']['present'] for s in labels]
+
+    return jsonify({
+        'labels': labels,
+        'overall_percentages': overall_pcts,
+        'theory_percentages': theory_pcts,
+        'practical_percentages': practical_pcts,
+        'tutorial_percentages': tutorial_pcts,
+        'present_counts': present_counts,
+        'absent_counts': absent_counts,
+        'grand_total': grand_total
+    })
+
+
+# Helper: compute summary statistics for report preview
+def _compute_report_stats(summary):
+    total_students = len(summary)
+    total_pct = sum(d.get("overall", {}).get("percentage", 0) for d in summary.values())
+    avg_percentage = round(total_pct / total_students, 2) if total_students > 0 else 0
+    low_count = sum(1 for d in summary.values() if d.get("overall", {}).get("percentage", 0) < 50)
+    return total_students, avg_percentage, low_count
+
+
+# Attendance Report Routes
+@app.route('/teacher/attendance-report', methods=['GET', 'POST'])
+@login_required(role='teacher')
+def teacher_attendance_report():
+    teacher_id = session['user_id']
+    teacher_name = session.get('full_name', 'Teacher')
+    subject = session.get('subject', 'N/A')
+
+    if request.method == 'POST':
+        summary = overall_attendance_summary(teacher_id)
+        if not summary:
+            flash('No attendance data available to generate report.', 'error')
+            return redirect(url_for('teacher_attendance_report'))
+
+        os.makedirs('reports', exist_ok=True)
+        filename = f"attendance_report_{teacher_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        output_path = os.path.join('reports', filename)
+
+        try:
+            pdf_generator.generate_attendance_pdf(summary, teacher_name, subject, output_path)
+            return send_file(output_path, as_attachment=True, download_name=filename)
+        except Exception as e:
+            logger.error(f"PDF generation error: {e}")
+            flash('Error generating PDF. Please try again.', 'error')
+            return redirect(url_for('teacher_attendance_report'))
+
+    summary = overall_attendance_summary(teacher_id)
+    total_students, avg_percentage, low_count = _compute_report_stats(summary)
+    return render_template(
+        'teacher/attendance_report.html',
+        summary=summary,
+        total_students=total_students,
+        avg_percentage=avg_percentage,
+        low_count=low_count,
+    )
+
+
+@app.route('/admin/attendance-report', methods=['GET', 'POST'])
+@login_required(role='admin')
+def admin_attendance_report():
+    teachers = list_teachers()
+
+    if request.method == 'POST':
+        teacher_id = request.form.get('teacher_id', type=int)
+        if not teacher_id:
+            flash('Please select a teacher.', 'error')
+            return redirect(url_for('admin_attendance_report'))
+
+        summary = overall_attendance_summary(teacher_id)
+        if not summary:
+            flash('No attendance data available for the selected teacher.', 'error')
+            return redirect(url_for('admin_attendance_report'))
+
+        teacher = get_teacher_by_id(teacher_id)
+        teacher_name = teacher['full_name'] if teacher else 'Teacher'
+        subject = teacher['subject_assigned'] if teacher else 'N/A'
+
+        os.makedirs('reports', exist_ok=True)
+        filename = f"attendance_report_{teacher_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        output_path = os.path.join('reports', filename)
+
+        try:
+            pdf_generator.generate_attendance_pdf(summary, teacher_name, subject, output_path)
+            return send_file(output_path, as_attachment=True, download_name=filename)
+        except Exception as e:
+            logger.error(f"PDF generation error: {e}")
+            flash('Error generating PDF. Please try again.', 'error')
+            return redirect(url_for('admin_attendance_report'))
+
+    teacher_id = request.args.get('teacher_id', type=int)
+    summary = None
+    selected_teacher = None
+    total_students = avg_percentage = low_count = 0
+
+    if teacher_id:
+        summary = overall_attendance_summary(teacher_id)
+        selected_teacher = get_teacher_by_id(teacher_id)
+        total_students, avg_percentage, low_count = _compute_report_stats(summary)
+
+    return render_template(
+        'admin/attendance_report.html',
+        teachers=teachers,
+        summary=summary,
+        selected_teacher=selected_teacher,
+        total_students=total_students,
+        avg_percentage=avg_percentage,
+        low_count=low_count,
+    )
 
 
 if __name__ == '__main__':

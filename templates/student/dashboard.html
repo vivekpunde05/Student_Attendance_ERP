@@ -15,34 +15,208 @@
     <div class="content-area">
         <h2>My Attendance</h2>
 
-        <div class="summary-section">
-            <div class="summary-item">
-                <span><strong>Overall Attendance</strong></span>
-                <span class="percentage {% if stats.overall.percentage >= 75 %}good{% elif stats.overall.percentage >= 50 %}warning{% else %}poor{% endif %}">
-                    {{ stats.overall.percentage }}%
-                </span>
+        <!-- Filters -->
+        <div class="filter-bar student-filter-bar">
+            <div class="filter-group">
+                <label for="subject-select">Subject:</label>
+                <select id="subject-select" class="filter-select" onchange="applyFilters()">
+                    <option value="all" {% if selected_subject == 'all' %}selected{% endif %}>All Subjects</option>
+                    {% for subj in subjects %}
+                    <option value="{{ subj }}" {% if selected_subject == subj %}selected{% endif %}>{{ subj }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="summary-item">
-                <span>Theory Classes</span>
-                <span class="percentage {% if stats.theory.percentage >= 75 %}good{% elif stats.theory.percentage >= 50 %}warning{% else %}poor{% endif %}">
-                    {{ stats.theory.percentage }}%
-                </span>
-            </div>
-            <div class="summary-item">
-                <span>Practical Sessions</span>
-                <span class="percentage {% if stats.practical.percentage >= 75 %}good{% elif stats.practical.percentage >= 50 %}warning{% else %}poor{% endif %}">
-                    {{ stats.practical.percentage }}%
-                </span>
-            </div>
-            <div class="summary-item">
-                <span>Tutorial Sessions</span>
-                <span class="percentage {% if stats.tutorial.percentage >= 75 %}good{% elif stats.tutorial.percentage >= 50 %}warning{% else %}poor{% endif %}">
-                    {{ stats.tutorial.percentage }}%
-                </span>
+            <div class="filter-group">
+                <span>Session:</span>
+                <a href="javascript:void(0)" class="filter-btn {% if selected_session == 'all' %}active{% endif %}" onclick="setSession('all')">All</a>
+                <a href="javascript:void(0)" class="filter-btn {% if selected_session == 'theory' %}active{% endif %}" onclick="setSession('theory')">Theory</a>
+                <a href="javascript:void(0)" class="filter-btn {% if selected_session == 'practical' %}active{% endif %}" onclick="setSession('practical')">Practical</a>
+                <a href="javascript:void(0)" class="filter-btn {% if selected_session == 'tutorial' %}active{% endif %}" onclick="setSession('tutorial')">Tutorial</a>
             </div>
         </div>
 
+        <!-- Stats Overview with Circular Progress -->
+        {% if grand_total %}
+        <div class="stats-overview">
+            <div class="stat-ring-card">
+                <div class="ring-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress-ring-fill good" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.73"
+                            stroke-dashoffset="{{ 326.73 - (326.73 * grand_total.overall.percentage / 100) }}"/>
+                    </svg>
+                    <div class="ring-text">
+                        <span class="ring-percent">{{ grand_total.overall.percentage }}%</span>
+                        <span class="ring-label">Overall</span>
+                    </div>
+                </div>
+                <p class="ring-detail">{{ grand_total.overall.present }} / {{ grand_total.overall.total }} classes</p>
+            </div>
+
+            <div class="stat-ring-card">
+                <div class="ring-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress-ring-fill {% if grand_total.theory.percentage >= 75 %}good{% elif grand_total.theory.percentage >= 50 %}warning{% else %}poor{% endif %}" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.73"
+                            stroke-dashoffset="{{ 326.73 - (326.73 * grand_total.theory.percentage / 100) }}"/>
+                    </svg>
+                    <div class="ring-text">
+                        <span class="ring-percent">{{ grand_total.theory.percentage }}%</span>
+                        <span class="ring-label">Theory</span>
+                    </div>
+                </div>
+                <p class="ring-detail">{{ grand_total.theory.present }} / {{ grand_total.theory.total }}</p>
+            </div>
+
+            <div class="stat-ring-card">
+                <div class="ring-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress-ring-fill {% if grand_total.practical.percentage >= 75 %}good{% elif grand_total.practical.percentage >= 50 %}warning{% else %}poor{% endif %}" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.73"
+                            stroke-dashoffset="{{ 326.73 - (326.73 * grand_total.practical.percentage / 100) }}"/>
+                    </svg>
+                    <div class="ring-text">
+                        <span class="ring-percent">{{ grand_total.practical.percentage }}%</span>
+                        <span class="ring-label">Practical</span>
+                    </div>
+                </div>
+                <p class="ring-detail">{{ grand_total.practical.present }} / {{ grand_total.practical.total }}</p>
+            </div>
+
+            <div class="stat-ring-card">
+                <div class="ring-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress-ring-fill {% if grand_total.tutorial.percentage >= 75 %}good{% elif grand_total.tutorial.percentage >= 50 %}warning{% else %}poor{% endif %}" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.73"
+                            stroke-dashoffset="{{ 326.73 - (326.73 * grand_total.tutorial.percentage / 100) }}"/>
+                    </svg>
+                    <div class="ring-text">
+                        <span class="ring-percent">{{ grand_total.tutorial.percentage }}%</span>
+                        <span class="ring-label">Tutorial</span>
+                    </div>
+                </div>
+                <p class="ring-detail">{{ grand_total.tutorial.present }} / {{ grand_total.tutorial.total }}</p>
+            </div>
+        </div>
+        {% elif basic_stats %}
+        <!-- Fallback to basic stats if no subject data -->
+        <div class="stats-overview">
+            <div class="stat-ring-card">
+                <div class="ring-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress-ring-fill good" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.73"
+                            stroke-dashoffset="{{ 326.73 - (326.73 * basic_stats.overall.percentage / 100) }}"/>
+                    </svg>
+                    <div class="ring-text">
+                        <span class="ring-percent">{{ basic_stats.overall.percentage }}%</span>
+                        <span class="ring-label">Overall</span>
+                    </div>
+                </div>
+                <p class="ring-detail">{{ basic_stats.overall.present }} / {{ basic_stats.overall.total }} classes</p>
+            </div>
+            <div class="stat-ring-card">
+                <div class="ring-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress-ring-fill {% if basic_stats.theory.percentage >= 75 %}good{% elif basic_stats.theory.percentage >= 50 %}warning{% else %}poor{% endif %}" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.73"
+                            stroke-dashoffset="{{ 326.73 - (326.73 * basic_stats.theory.percentage / 100) }}"/>
+                    </svg>
+                    <div class="ring-text">
+                        <span class="ring-percent">{{ basic_stats.theory.percentage }}%</span>
+                        <span class="ring-label">Theory</span>
+                    </div>
+                </div>
+                <p class="ring-detail">{{ basic_stats.theory.present }} / {{ basic_stats.theory.total }}</p>
+            </div>
+            <div class="stat-ring-card">
+                <div class="ring-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress-ring-fill {% if basic_stats.practical.percentage >= 75 %}good{% elif basic_stats.practical.percentage >= 50 %}warning{% else %}poor{% endif %}" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.73"
+                            stroke-dashoffset="{{ 326.73 - (326.73 * basic_stats.practical.percentage / 100) }}"/>
+                    </svg>
+                    <div class="ring-text">
+                        <span class="ring-percent">{{ basic_stats.practical.percentage }}%</span>
+                        <span class="ring-label">Practical</span>
+                    </div>
+                </div>
+                <p class="ring-detail">{{ basic_stats.practical.present }} / {{ basic_stats.practical.total }}</p>
+            </div>
+            <div class="stat-ring-card">
+                <div class="ring-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress-ring-fill {% if basic_stats.tutorial.percentage >= 75 %}good{% elif basic_stats.tutorial.percentage >= 50 %}warning{% else %}poor{% endif %}" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.73"
+                            stroke-dashoffset="{{ 326.73 - (326.73 * basic_stats.tutorial.percentage / 100) }}"/>
+                    </svg>
+                    <div class="ring-text">
+                        <span class="ring-percent">{{ basic_stats.tutorial.percentage }}%</span>
+                        <span class="ring-label">Tutorial</span>
+                    </div>
+                </div>
+                <p class="ring-detail">{{ basic_stats.tutorial.present }} / {{ basic_stats.tutorial.total }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Charts Section -->
+        {% if subject_stats and selected_subject == 'all' %}
+        <div class="charts-section">
+            <div class="chart-card">
+                <h4>📊 Attendance by Subject</h4>
+                <div class="chart-container">
+                    <canvas id="subjectBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Subject-wise Cards -->
+        {% if subject_stats and selected_subject == 'all' %}
+        <h3>Subject-wise Details</h3>
+        <div class="subject-cards-grid">
+            {% for subj, stat in subject_stats.items() %}
+            <div class="subject-card">
+                <div class="subject-header">
+                    <h4>{{ subj }}</h4>
+                    <span class="subject-percent {% if stat.overall.percentage >= 75 %}good{% elif stat.overall.percentage >= 50 %}warning{% else %}poor{% endif %}">{{ stat.overall.percentage }}%</span>
+                </div>
+                <div class="subject-sessions">
+                    <div class="session-tag">
+                        <span class="session-label">Theory</span>
+                        <span class="session-val">{{ stat.theory.present }}/{{ stat.theory.total }}</span>
+                    </div>
+                    <div class="session-tag">
+                        <span class="session-label">Practical</span>
+                        <span class="session-val">{{ stat.practical.present }}/{{ stat.practical.total }}</span>
+                    </div>
+                    <div class="session-tag">
+                        <span class="session-label">Tutorial</span>
+                        <span class="session-val">{{ stat.tutorial.present }}/{{ stat.tutorial.total }}</span>
+                    </div>
+                </div>
+                <div class="subject-progress">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill {% if stat.overall.percentage >= 75 %}good{% elif stat.overall.percentage >= 50 %}warning{% else %}poor{% endif %}" style="width: {{ stat.overall.percentage }}%"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Attendance History -->
         <h3>Attendance History</h3>
+        {% if records %}
         <table>
             <thead>
                 <tr>
@@ -59,7 +233,9 @@
                     <td>{{ record.date }}</td>
                     <td>{{ record.time }}</td>
                     <td>{{ record.subject }}</td>
-                    <td>{{ record.session_type }}</td>
+                    <td>
+                        <span class="session-badge {{ record.session_type }}">{{ record.session_type }}</span>
+                    </td>
                     <td>
                         <span class="badge badge-{{ record.status }}">{{ record.status }}</span>
                     </td>
@@ -67,6 +243,78 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="empty-state">
+            <p>No attendance records found for the selected filters.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+let currentSubject = "{{ selected_subject }}";
+let currentSession = "{{ selected_session }}";
+
+function setSession(sess) {
+    currentSession = sess;
+    applyFilters();
+}
+
+function applyFilters() {
+    const subject = document.getElementById('subject-select').value;
+    const params = new URLSearchParams();
+    if (subject && subject !== 'all') params.set('subject', subject);
+    if (currentSession && currentSession !== 'all') params.set('session_type', currentSession);
+    window.location.href = "{{ url_for('student_dashboard') }}" + (params.toString() ? '?' + params.toString() : '');
+}
+
+{% if subject_stats %}
+// Fetch chart data via API
+fetch("{{ url_for('student_attendance_data') }}?subject=" + encodeURIComponent(currentSubject))
+    .then(r => r.json())
+    .then(data => {
+        initCharts(data);
+    })
+    .catch(err => console.error('Chart data error:', err));
+
+function initCharts(data) {
+    const labels = data.labels;
+    const grand = data.grand_total;
+
+    // Subject Bar Chart
+    new Chart(document.getElementById('subjectBarChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Overall %',
+                    data: data.overall_percentages,
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: { callback: v => v + '%' }
+                }
+            }
+        }
+    });
+
+}
+{% endif %}
+</script>
 {% endblock %}
+

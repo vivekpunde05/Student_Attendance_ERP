@@ -18,11 +18,24 @@
             <a href="{{ url_for('admin_teachers') }}" class="menu-item">👨‍🏫 Teachers</a>
             <a href="{{ url_for('admin_students') }}" class="menu-item active">👨‍🎓 Students</a>
             <a href="{{ url_for('admin_reports') }}" class="menu-item">📈 Reports</a>
+            <a href="{{ url_for('admin_attendance_report') }}" class="menu-item">📄 PDF Report</a>
         </div>
 
         <div class="content-area">
             <h2>Manage Students</h2>
-            <button class="btn btn-primary" onclick="showModal()">+ Add Student</button>
+
+            <div class="filter-bar student-filter-bar">
+                <div class="filter-group">
+                    <label for="class-filter">Filter by Class:</label>
+                    <select id="class-filter" class="filter-select" onchange="applyClassFilter()">
+                        <option value="all" {% if selected_class == 'all' %}selected{% endif %}>All Classes</option>
+                        {% for cls in classes %}
+                        <option value="{{ cls }}" {% if selected_class == cls %}selected{% endif %}>{{ cls }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="showModal()">+ Add Student</button>
+            </div>
 
             <table>
                 <thead>
@@ -30,6 +43,7 @@
                         <th>Serial No</th>
                         <th>PRN</th>
                         <th>Name</th>
+                        <th>Class</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -39,6 +53,7 @@
                         <td>{{ student.serial_no }}</td>
                         <td>{{ student.prn }}</td>
                         <td>{{ student.name }}</td>
+                        <td>{{ student.class_name or '-' }}</td>
                         <td>
                             <a href="{{ url_for('admin_delete_student', student_id=student.id) }}" 
                                class="btn btn-danger btn-sm"
@@ -72,6 +87,10 @@
                 <label>Full Name</label>
                 <input type="text" name="name" required>
             </div>
+            <div class="form-group">
+                <label>Class / Year</label>
+                <input type="text" name="class_name" placeholder="e.g. FY, SY, TY, BE">
+            </div>
             <button type="submit" class="btn btn-primary">Add Student</button>
         </form>
     </div>
@@ -83,6 +102,12 @@
     }
     function closeModal() {
         document.getElementById('addModal').style.display = 'none';
+    }
+    function applyClassFilter() {
+        const className = document.getElementById('class-filter').value;
+        const params = new URLSearchParams();
+        if (className && className !== 'all') params.set('class_name', className);
+        window.location.href = "{{ url_for('admin_students') }}" + (params.toString() ? '?' + params.toString() : '');
     }
 </script>
 {% endblock %}

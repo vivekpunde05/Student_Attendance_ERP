@@ -18,12 +18,32 @@
             <a href="{{ url_for('teacher_mark_attendance') }}" class="menu-item active">✅ Mark Attendance</a>
             <a href="{{ url_for('teacher_view_attendance') }}" class="menu-item">👁️ View Records</a>
             <a href="{{ url_for('teacher_summary') }}" class="menu-item">📈 Summary</a>
+            <a href="{{ url_for('teacher_attendance_report') }}" class="menu-item">📄 Attendance Report</a>
         </div>
 
         <div class="content-area">
             <h2>Mark Attendance</h2>
 
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="class-filter">Filter by Class:</label>
+                    <select id="class-filter" class="filter-select" onchange="applyClassFilter()">
+                        <option value="all" {% if selected_class == 'all' %}selected{% endif %}>All Classes</option>
+                        {% for cls in classes %}
+                        <option value="{{ cls }}" {% if selected_class == cls %}selected{% endif %}>{{ cls }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
             <form method="POST">
+                <input type="hidden" name="selected_class_name" value="{{ selected_class }}">
+
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="date" value="{{ today }}" required>
+                </div>
+
                 <div class="form-group">
                     <label>Session Type</label>
                     <select name="session_type" required>
@@ -59,4 +79,13 @@
         </div>
     </div>
 </div>
+
+<script>
+    function applyClassFilter() {
+        const className = document.getElementById('class-filter').value;
+        const params = new URLSearchParams();
+        if (className && className !== 'all') params.set('class_name', className);
+        window.location.href = "{{ url_for('teacher_mark_attendance') }}" + (params.toString() ? '?' + params.toString() : '');
+    }
+</script>
 {% endblock %}
