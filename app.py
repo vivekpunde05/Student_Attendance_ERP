@@ -353,15 +353,18 @@ def admin_delete_student(student_id):
 @login_required(role='admin')
 def admin_reports():
     teachers = list_teachers()
+    classes = get_distinct_student_classes()
     teacher_id = request.args.get('teacher_id', type=int)
+    selected_class = request.args.get('class_name', '')
     summary = None
     selected_teacher = None
 
     if teacher_id:
-        summary = overall_attendance_summary(teacher_id)
+        summary = overall_attendance_summary(teacher_id, class_name=selected_class or None)
         selected_teacher = next((t for t in teachers if t['id'] == teacher_id), None)
 
-    return render_template('admin/reports.html', teachers=teachers, summary=summary, selected_teacher=selected_teacher)
+    return render_template('admin/reports.html', teachers=teachers, classes=classes, summary=summary,
+                           selected_teacher=selected_teacher, selected_class=selected_class)
 
 # Teacher Routes
 @app.route('/teacher/dashboard')
@@ -536,14 +539,16 @@ def teacher_attendance_report():
 @login_required(role='admin')
 def admin_attendance_report():
     teachers = list_teachers()
+    classes = get_distinct_student_classes()
 
     if request.method == 'POST':
         teacher_id = request.form.get('teacher_id', type=int)
+        selected_class = request.form.get('class_name', '')
         if not teacher_id:
             flash('Please select a teacher.', 'error')
             return redirect(url_for('admin_attendance_report'))
 
-        summary = overall_attendance_summary(teacher_id)
+        summary = overall_attendance_summary(teacher_id, class_name=selected_class or None)
         if not summary:
             flash('No attendance data available for the selected teacher.', 'error')
             return redirect(url_for('admin_attendance_report'))
@@ -565,20 +570,23 @@ def admin_attendance_report():
             return redirect(url_for('admin_attendance_report'))
 
     teacher_id = request.args.get('teacher_id', type=int)
+    selected_class = request.args.get('class_name', '')
     summary = None
     selected_teacher = None
     total_students = avg_percentage = low_count = 0
 
     if teacher_id:
-        summary = overall_attendance_summary(teacher_id)
+        summary = overall_attendance_summary(teacher_id, class_name=selected_class or None)
         selected_teacher = get_teacher_by_id(teacher_id)
         total_students, avg_percentage, low_count = _compute_report_stats(summary)
 
     return render_template(
         'admin/attendance_report.html',
         teachers=teachers,
+        classes=classes,
         summary=summary,
         selected_teacher=selected_teacher,
+        selected_class=selected_class,
         total_students=total_students,
         avg_percentage=avg_percentage,
         low_count=low_count,

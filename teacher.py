@@ -96,8 +96,8 @@ def attendance_summary_by_type(teacher_id, class_name=None):
         )
     return summary
 
-def overall_attendance_summary(teacher_id):
-    summary = attendance_summary_by_type(teacher_id)
+def overall_attendance_summary(teacher_id, class_name=None):
+    summary = attendance_summary_by_type(teacher_id, class_name=class_name)
     for sid, data in summary.items():
         total_lectures = int(data["theory"]["total"]) + int(data["practical"]["total"]) + int(data["tutorial"]["total"])
         attended = int(data["theory"]["attended"]) + int(data["practical"]["attended"]) + int(data["tutorial"]["attended"])

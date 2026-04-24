@@ -37,11 +37,23 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Select Class</label>
+                    <select name="class_name" onchange="this.form.submit()">
+                        <option value="">All Classes</option>
+                        {% for class in classes %}
+                        <option value="{{ class }}" {% if selected_class == class %}selected{% endif %}>
+                            {{ class }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
             </form>
 
             {% if summary %}
             <div class="report-preview">
                 <h3>Preview: {{ selected_teacher.full_name }} — {{ selected_teacher.subject_assigned }}</h3>
+                <p>Class: {% if selected_class %}{{ selected_class }}{% else %}All Classes{% endif %}</p>
 
                 <table class="report-table">
                     <thead>
@@ -94,6 +106,7 @@
 
                 <form method="POST" action="{{ url_for('admin_attendance_report') }}" class="report-actions">
                     <input type="hidden" name="teacher_id" value="{{ selected_teacher.id }}">
+                    <input type="hidden" name="class_name" value="{{ selected_class }}">
                     <button type="submit" class="btn btn-primary">📥 Generate & Download PDF</button>
                 </form>
             </div>
