@@ -45,7 +45,6 @@ def get_student_statistics(prn):
 
     return stats
 
-
 def get_student_subjects(prn):
     """Return distinct subjects for a student ordered alphabetically."""
     q = """
