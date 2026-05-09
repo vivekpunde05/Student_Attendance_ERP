@@ -113,9 +113,8 @@ def find_user_by_username_and_email(username: str, email: str):
     return None, None
 
 
-# ============================================================================
+
 # TOKEN & HASHING UTILITIES
-# ============================================================================
 
 def generate_secure_token(length: int = 32) -> str:
     """Generate cryptographically secure random token using secrets"""
@@ -123,9 +122,7 @@ def generate_secure_token(length: int = 32) -> str:
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 
-# ============================================================================
 # EMAIL FUNCTION
-# ============================================================================
 
 def send_reset_email(to_email: str, username: str, token: str, user_type: str):
     """Send password reset email via SMTP"""
