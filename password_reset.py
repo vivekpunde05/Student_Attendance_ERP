@@ -194,9 +194,7 @@ body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
         return False
 
 
-# ============================================================================
 # UPDATE PASSWORD FUNCTIONS
-# ============================================================================
 
 def update_user_password(user_type: str, user_id: int, new_password: str):
     """Update password with PBKDF2 hash (compatible with utils.py) for admin or teacher"""
@@ -207,9 +205,7 @@ def update_user_password(user_type: str, user_id: int, new_password: str):
         execute("UPDATE teachers SET password_hash = %s WHERE id = %s", (hashed, user_id), commit=True)
 
 
-# ============================================================================
 # FLASK ROUTES
-# ============================================================================
 
 @password_reset_bp.route('/forgot-password-v2', methods=['GET', 'POST'])
 def forgot_password_v2():
