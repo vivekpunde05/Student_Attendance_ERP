@@ -28,7 +28,6 @@ password_reset_bp = Blueprint('password_reset', __name__, template_folder='templ
 
 # DATABASE FUNCTIONS
 
-
 def create_reset_tokens_table():
     """Create password_reset_tokens table if not exists"""
     execute("""
@@ -85,9 +84,8 @@ def delete_expired_tokens():
     )
 
 
-# ============================================================================
+
 # USER LOOKUP FUNCTIONS
-# ============================================================================
 
 def find_user_by_email(email: str):
     """Find admin or teacher by email. Returns (user_type, user_data) or (None, None)"""
