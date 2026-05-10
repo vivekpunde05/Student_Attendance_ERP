@@ -308,7 +308,6 @@ def reset_password_v2():
     # GET: Show reset form
     return render_template('password_reset/do_reset.html', token=token)
 
-
 @password_reset_bp.route('/reset-success')
 def reset_success():
     """Success confirmation page"""
