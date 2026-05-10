@@ -288,4 +288,3 @@ Educational use.
 - [x] Default admin login works
 - [x] Password reset flow tested
 - [x] PDF report generation tested
-
