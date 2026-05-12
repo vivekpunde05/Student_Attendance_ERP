@@ -19,6 +19,5 @@ for row in result:
     if 'reset' in row['Field'].lower():
         print(f"✓ {row['Field']}: {row['Type']}")
 
-
 print("Migration complete! Now teacher forgot password will work.")
 
