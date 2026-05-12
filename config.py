@@ -16,6 +16,7 @@ DB_CONFIG = {
     "autocommit": False
 }
 
+
 # Debug: Print config (without password) to verify environment variables are loaded
 print(f"DB Config - Host: {DB_CONFIG['host']}, User: {DB_CONFIG['user']}, Database: {DB_CONFIG['database']}, Port: {DB_CONFIG['port']}")
 
