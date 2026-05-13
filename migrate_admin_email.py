@@ -14,5 +14,4 @@ print("Verifying...")
 result = execute("SELECT username, email FROM admins WHERE username = 'admin'", fetch=True)
 print(result)
 
-
 print("Migration complete!")
