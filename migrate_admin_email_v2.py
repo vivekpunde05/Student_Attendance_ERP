@@ -25,9 +25,10 @@ def migrate():
         execute("UPDATE admins SET email = 'admin@attendance-erp.local' WHERE email IS NULL", commit=True)
         print("✅ Default admin email set")
         
-        
+
     except Exception as e:
         print(f"Migration error: {e}")
+
 
 
 if __name__ == '__main__':
