@@ -455,7 +455,6 @@ def student_dashboard():
         basic_stats=basic_stats
     )
 
-
 @app.route('/student/attendance-data')
 @login_required(role='student')
 def student_attendance_data():
