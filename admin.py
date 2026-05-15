@@ -65,6 +65,5 @@ def get_statistics():
         'teachers': teachers[0]['count'] if teachers else 0,
         'students': students[0]['count'] if students else 0,
         'attendance': total_count,
-     
         'avg_attendance': avg_attendance
     }
