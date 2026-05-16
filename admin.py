@@ -23,6 +23,7 @@ def list_teachers():
 
 def remove_teacher(teacher_id):
     execute("DELETE FROM teachers WHERE id=%s", (teacher_id,), commit=True)
+    
 def change_admin_password(admin_id: int, new_password: str):
     """Allow admin to change their own password"""
     is_valid, error = utils.validate_password_length(new_password)
