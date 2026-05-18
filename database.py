@@ -41,6 +41,7 @@ def create_tables():
     ) ENGINE=InnoDB;
     """, commit=True)
 
+
     execute("""
     CREATE TABLE IF NOT EXISTS attendance (
         id INT AUTO_INCREMENT PRIMARY KEY,
