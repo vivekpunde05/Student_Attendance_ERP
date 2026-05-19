@@ -33,8 +33,7 @@ def execute(query, params=None, fetch=False, many=False, commit=False):
             result = cursor.fetchall()
         if commit:
             conn.commit()
-        return result
-    
+        return resul
     finally:
         cursor.close()
         conn.close()
