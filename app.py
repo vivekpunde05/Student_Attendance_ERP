@@ -396,7 +396,7 @@ def teacher_mark_attendance():
         mark_attendance(session['user_id'], session['subject'], session_type, attendance_list, date=date)
         flash('Attendance marked successfully', 'success')
         return redirect(url_for('teacher_view_attendance'))
-
+    
     students = view_students(class_name=class_filter)
     classes = get_distinct_student_classes()
     today = datetime.now().strftime('%Y-%m-%d')
