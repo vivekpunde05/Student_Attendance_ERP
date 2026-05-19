@@ -392,7 +392,7 @@ def teacher_mark_attendance():
             status = request.form.get(f'status_{student["id"]}')
             if status:
                 attendance_list.append((student['id'], status))
-
+                
         mark_attendance(session['user_id'], session['subject'], session_type, attendance_list, date=date)
         flash('Attendance marked successfully', 'success')
         return redirect(url_for('teacher_view_attendance'))
