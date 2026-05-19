@@ -30,7 +30,6 @@ def migrate():
         print(f"Migration error: {e}")
 
 
-
 if __name__ == '__main__':
     migrate()
 
