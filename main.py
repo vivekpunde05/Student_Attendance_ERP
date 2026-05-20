@@ -82,6 +82,7 @@ def admin_menu(admin):
         elif ch == '0':
             break
 
+
 def teacher_menu(teacher):
     tid = teacher['id']
     subject = teacher['subject_assigned']
