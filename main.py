@@ -96,7 +96,7 @@ def teacher_menu(teacher):
         print("5. Delete Attendance")
         print("6. Attendance Summary")
         print("0. Logout")
-
+        
         ch = input("Choice: ")
 
         if ch == '1':
