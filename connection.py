@@ -35,5 +35,6 @@ def execute(query, params=None, fetch=False, many=False, commit=False):
             conn.commit()
         return result
     finally:
+        
         cursor.close()
         conn.close()
