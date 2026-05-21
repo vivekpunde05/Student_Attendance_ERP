@@ -98,7 +98,6 @@ def teacher_menu(teacher):
         print("0. Logout")
         
         ch = input("Choice: ")
-
         if ch == '1':
             for s in view_students():
                 print(s)
