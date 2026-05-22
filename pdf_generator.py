@@ -238,4 +238,3 @@ def generate_attendance_pdf(data, teacher_name, subject, output_path):
 
     doc.build(story)
     return output_path
-
