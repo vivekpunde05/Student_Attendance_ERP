@@ -235,7 +235,6 @@ def forgot_password_v2():
             
             # Send email
             sent = send_reset_email(email, user.get('full_name') or user.get('username'), token, user_type)
-            
             if sent:
                 flash('Reset link sent! Check your email (valid for 30 minutes).', 'success')
             else:
