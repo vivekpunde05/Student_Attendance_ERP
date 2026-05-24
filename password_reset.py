@@ -251,7 +251,6 @@ def forgot_password_v2():
     
     return render_template('password_reset/request_reset.html')
 
-
 @password_reset_bp.route('/reset-password-v2', methods=['GET', 'POST'])
 def reset_password_v2():
     """Step 2: User clicks email link and sets new password"""
