@@ -98,7 +98,7 @@ def teacher_menu(teacher):
         print("0. Logout")
         
         ch = input("Choice: ")
-        
+
         if ch == '1':
             for s in view_students():
                 print(s)
@@ -112,7 +112,7 @@ def teacher_menu(teacher):
             students = view_students()
             print("\nMark P/A for each student:")
             att = []
-
+            
             for s in students:
                 ans = input(f"{s['serial_no']} - {s['name']} (PRN:{s['prn']}): ")
                 status = 'present' if ans.lower().startswith('p') else 'absent'
