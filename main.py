@@ -82,7 +82,6 @@ def admin_menu(admin):
         elif ch == '0':
             break
 
-
 def teacher_menu(teacher):
     tid = teacher['id']
     subject = teacher['subject_assigned']
@@ -112,7 +111,7 @@ def teacher_menu(teacher):
             students = view_students()
             print("\nMark P/A for each student:")
             att = []
-            
+
             for s in students:
                 ans = input(f"{s['serial_no']} - {s['name']} (PRN:{s['prn']}): ")
                 status = 'present' if ans.lower().startswith('p') else 'absent'
