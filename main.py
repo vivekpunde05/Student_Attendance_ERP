@@ -119,7 +119,7 @@ def teacher_menu(teacher):
 
             mark_attendance(tid, subject, stype, att)
             print("Attendance marked successfully.")
-            
+
         elif ch == '3':
             for r in view_attendance(tid):
                 print(r)
@@ -147,7 +147,6 @@ def teacher_menu(teacher):
 
         elif ch == '0':
             break
-
 
 def student_menu():
     prn = input("Enter your PRN: ")
