@@ -81,7 +81,7 @@ def admin_menu(admin):
 
         elif ch == '0':
             break
-        
+
 def teacher_menu(teacher):
     tid = teacher['id']
     subject = teacher['subject_assigned']
@@ -119,7 +119,7 @@ def teacher_menu(teacher):
 
             mark_attendance(tid, subject, stype, att)
             print("Attendance marked successfully.")
-
+            
         elif ch == '3':
             for r in view_attendance(tid):
                 print(r)
