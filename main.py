@@ -158,7 +158,6 @@ def student_menu():
         for r in rows:
             print(r)
 
-
 def run():
     setup()
 
