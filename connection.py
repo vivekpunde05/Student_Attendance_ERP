@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import pooling
 from config import DB_CONFIG
 
-_pool = None
+pool = None
 
 def init_pool(pool_size=3):
     global _pool
