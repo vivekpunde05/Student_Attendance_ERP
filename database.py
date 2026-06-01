@@ -72,6 +72,7 @@ def create_password_reset_tables():
     ) ENGINE=InnoDB;
     """, commit=True)
 
+
 def migrate_students_add_class():
     """Add class_name column to students table if it doesn't exist (for existing DBs)."""
     try:
