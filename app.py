@@ -422,6 +422,7 @@ def teacher_summary():
     summary = overall_attendance_summary(session['user_id'])
     return render_template('teacher/summary.html', summary=summary)
 
+
 # Student Routes
 @app.route('/student/dashboard')
 @login_required(role='student')
