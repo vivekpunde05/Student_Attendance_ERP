@@ -237,5 +237,6 @@ def generate_attendance_pdf(data, teacher_name, subject, output_path):
     )
     story.append(Paragraph("This is a computer-generated attendance report.", footer_style))
 
+
     doc.build(story)
     return output_path
