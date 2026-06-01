@@ -206,6 +206,7 @@ def generate_attendance_pdf(data, teacher_name, subject, output_path):
     story.append(Paragraph("<b>Overall Summary</b>", summary_style))
     story.append(Spacer(1, 6))
 
+
     summary_data = [
         [Paragraph("<b>Total Students</b>", cell_style), Paragraph(_safe(total_students), cell_style)],
         [Paragraph("<b>Average Attendance</b>", cell_style), Paragraph(_safe(f"{avg_pct}%"), cell_style)],
