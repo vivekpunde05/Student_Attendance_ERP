@@ -426,6 +426,7 @@ def teacher_summary():
 # Student Routes
 @app.route('/student/dashboard')
 @login_required(role='student')
+
 def student_dashboard():
     prn = session['prn']
     selected_subject = request.args.get('subject', 'all')
