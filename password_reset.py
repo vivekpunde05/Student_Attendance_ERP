@@ -246,9 +246,7 @@ def forgot_password_v2():
         except Exception as e:
             current_app.logger.error(f"Password reset error: {e}")
             flash('An error occurred. Please try again later.', 'error')
-        
         return redirect(url_for('password_reset.forgot_password_v2'))
-    
     return render_template('password_reset/request_reset.html')
 
 @password_reset_bp.route('/reset-password-v2', methods=['GET', 'POST'])
@@ -256,7 +254,7 @@ def reset_password_v2():
     """Step 2: User clicks email link and sets new password"""
     token = request.args.get('token') or request.form.get('token')
     
-    
+
     if not token:
         flash('Invalid reset link. Please request a new one.', 'error')
         return redirect(url_for('password_reset.forgot_password_v2'))
