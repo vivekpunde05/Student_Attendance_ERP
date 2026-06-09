@@ -263,7 +263,7 @@ def reset_password_v2():
     record = get_token_record(token)
     if not record:
         # Check if token exists but expired/used
-        
+
         check = execute("SELECT * FROM password_reset_tokens WHERE token = %s", (token,), fetch=True)
         if check:
             if check[0]['used']:
@@ -272,6 +272,7 @@ def reset_password_v2():
                 flash('This reset link has expired. Please request a new one.', 'error')
         else:
             flash('Invalid reset link. Please request a new one.', 'error')
+            
         return redirect(url_for('password_reset.forgot_password_v2'))
     
     if request.method == 'POST':
