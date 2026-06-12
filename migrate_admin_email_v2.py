@@ -3,10 +3,8 @@ Migration: Add email column to admins table
 Required for Password Reset v2 system
 """
 from connection import init_pool, execute
-
 def migrate():
     init_pool()
-    
     # Check if email column exists
     try:
         result = execute("SHOW COLUMNS FROM admins LIKE 'email'", fetch=True)
