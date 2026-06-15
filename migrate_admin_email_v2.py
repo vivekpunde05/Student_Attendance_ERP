@@ -13,12 +13,10 @@ def migrate():
             return
     except Exception as e:
         print(f"Error checking columns: {e}")
-    
     # Add email column
     try:
         execute("ALTER TABLE admins ADD COLUMN email VARCHAR(100) UNIQUE", commit=True)
         print("✅ email column added to admins table")
-        
         # Update default admin with a placeholder email
         execute("UPDATE admins SET email = 'admin@attendance-erp.local' WHERE email IS NULL", commit=True)
         print("✅ Default admin email set")
