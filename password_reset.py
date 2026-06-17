@@ -271,8 +271,7 @@ def reset_password_v2():
             else:
                 flash('This reset link has expired. Please request a new one.', 'error')
         else:
-            flash('Invalid reset link. Please request a new one.', 'error')
-            
+            flash('Invalid reset link. Please request a new one.', 'error')  
         return redirect(url_for('password_reset.forgot_password_v2'))
     
     if request.method == 'POST':
