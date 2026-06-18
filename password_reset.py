@@ -258,7 +258,6 @@ def reset_password_v2():
     if not token:
         flash('Invalid reset link. Please request a new one.', 'error')
         return redirect(url_for('password_reset.forgot_password_v2'))
-    
     # Verify token
     record = get_token_record(token)
     if not record:
@@ -277,7 +276,7 @@ def reset_password_v2():
     if request.method == 'POST':
         new_password = request.form.get('new_password', '')
         confirm_password = request.form.get('confirm_password', '')
-        
+
         # Validation
         if len(new_password) < 8:
             flash('Password must be at least 8 characters long', 'error')
