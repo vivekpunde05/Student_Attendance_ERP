@@ -262,7 +262,6 @@ def reset_password_v2():
     record = get_token_record(token)
     if not record:
         # Check if token exists but expired/used
-
         check = execute("SELECT * FROM password_reset_tokens WHERE token = %s", (token,), fetch=True)
         if check:
             if check[0]['used']:
