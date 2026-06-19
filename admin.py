@@ -18,7 +18,6 @@ def add_teacher(username, password, full_name, email, subject):
     execute("INSERT INTO teachers (username,password_hash,full_name,email,subject_assigned) VALUES (%s,%s,%s,%s,%s)",
             (username, pw_hash, full_name, email, subject), commit=True)
 
-
 def list_teachers():
     return execute("SELECT * FROM teachers", fetch=True)
 
