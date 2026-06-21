@@ -281,7 +281,6 @@ Educational use.
 
 ## ✅ Verified Setup
 
-
 - [x] Python 3.13 + venv
 - [x] Dependencies installed
 - [x] Aiven MySQL connected

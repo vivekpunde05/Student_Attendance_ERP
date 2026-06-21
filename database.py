@@ -83,7 +83,6 @@ def migrate_students_add_class():
         # Column likely already exists
         pass
 
-
 def create_default_admin():
     r = execute("SELECT COUNT(*) as cnt FROM admins", fetch=True)
     if r and r[0]['cnt'] == 0:
