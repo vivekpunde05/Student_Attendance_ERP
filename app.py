@@ -535,7 +535,6 @@ def teacher_attendance_report():
         low_count=low_count,
     )
 
-
 @app.route('/admin/attendance-report', methods=['GET', 'POST'])
 @login_required(role='admin')
 def admin_attendance_report():
