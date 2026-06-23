@@ -592,6 +592,7 @@ def admin_attendance_report():
         low_count=low_count,
     )
 
+
 if __name__ == '__main__':
     import os
     try:
