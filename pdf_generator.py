@@ -14,11 +14,9 @@ from reportlab.platypus import (
 )
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
-
 def _safe(text):
     """Escape text for ReportLab Paragraph XML parsing."""
     return html.escape(str(text))
-
 
 def generate_attendance_pdf(data, teacher_name, subject, output_path):
     """
