@@ -78,7 +78,6 @@ def admin_menu(admin):
                 print(f"  Practical: {data['practical']['attended']}/{data['practical']['total']} ({data['practical']['percentage']}%)")
                 print(f"  Tutorial: {data['tutorial']['attended']}/{data['tutorial']['total']} ({data['tutorial']['percentage']}%)")
                 print(f"  OVERALL: {data['overall']['attended']}/{data['overall']['total']} ({data['overall']['percentage']}%)")
-
         elif ch == '0':
             break
 
