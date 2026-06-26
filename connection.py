@@ -13,6 +13,7 @@ def init_pool(pool_size=3):
             pool_reset_session=True,
             **DB_CONFIG
         )
+        
 def get_conn():
     global _pool
     if _pool is None:
