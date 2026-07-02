@@ -42,7 +42,6 @@ def get_student_statistics(prn):
     for key in stats:
         if stats[key]['total'] > 0:
             stats[key]['percentage'] = round((stats[key]['present'] / stats[key]['total']) * 100, 2)
-
     return stats
 
 def get_student_subjects(prn):
