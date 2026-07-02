@@ -9,6 +9,7 @@ except Exception as e:
 
 print("Updating admin email...")
 execute("UPDATE admins SET email = 'vivekpunde6@gmail.com' WHERE username = 'admin'", commit=True)
+
 print("Verifying...")
 result = execute("SELECT username, email FROM admins WHERE username = 'admin'", fetch=True)
 print(result)
