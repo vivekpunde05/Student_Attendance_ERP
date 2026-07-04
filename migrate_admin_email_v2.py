@@ -13,6 +13,7 @@ def migrate():
             return
     except Exception as e:
         print(f"Error checking columns: {e}")
+        
     # Add email column
     try:
         execute("ALTER TABLE admins ADD COLUMN email VARCHAR(100) UNIQUE", commit=True)
