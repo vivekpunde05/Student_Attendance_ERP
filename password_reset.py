@@ -26,7 +26,6 @@ password_reset_bp = Blueprint('password_reset', __name__, template_folder='templ
 
 
 # DATABASE FUNCTIONS
-
 def create_reset_tokens_table():
     """Create password_reset_tokens table if not exists"""
     execute("""
