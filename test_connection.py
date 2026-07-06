@@ -12,7 +12,6 @@ def test_connection():
     print(f"Port: {DB_CONFIG['port']}")
     print(f"SSL Enabled: {not DB_CONFIG['ssl_disabled']}")
     print("-" * 50)
-    
     try:
         conn = get_conn()
         cursor = conn.cursor()
