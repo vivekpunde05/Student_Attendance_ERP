@@ -9,7 +9,6 @@ def student_view(prn):
         ORDER BY a.date DESC, a.time DESC
     """
     return execute(q, (prn,), fetch=True)
-
 def get_student_by_prn(prn):
     result = execute("SELECT * FROM students WHERE prn = %s", (prn,), fetch=True)
     return result[0] if result else None
