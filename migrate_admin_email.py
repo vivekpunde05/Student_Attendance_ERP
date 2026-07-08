@@ -6,7 +6,6 @@ try:
     print("Email column added")
 except Exception as e:
     print(f"Column exists or error: {e}")
-
 print("Updating admin email...")
 execute("UPDATE admins SET email = 'vivekpunde6@gmail.com' WHERE username = 'admin'", commit=True)
 print("Verifying...")
