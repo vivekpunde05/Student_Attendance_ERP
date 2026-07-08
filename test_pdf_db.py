@@ -10,7 +10,6 @@ from pdf_generator import generate_attendance_pdf
 
 init_pool()
 database.create_tables()
-
 # Get all teachers
 teachers = execute("SELECT * FROM teachers", fetch=True)
 print(f"Found {len(teachers)} teacher(s)")
