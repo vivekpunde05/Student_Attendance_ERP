@@ -28,7 +28,6 @@ def generate_attendance_pdf(data, teacher_name, subject, output_path):
         subject: str
         output_path: full file path for the PDF
     """
-    
     doc = SimpleDocTemplate(
         output_path,
         pagesize=landscape(A4),
