@@ -21,7 +21,6 @@ def _safe(text):
 def generate_attendance_pdf(data, teacher_name, subject, output_path):
     """
     Generate a professional attendance report PDF.
-
     Args:
         data: dict from overall_attendance_summary() — keyed by student_id
         teacher_name: str
