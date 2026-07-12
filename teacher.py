@@ -5,7 +5,6 @@ from utils import *
 def get_teacher_by_id(teacher_id):
     r = execute("SELECT * FROM teachers WHERE id=%s", (teacher_id,), fetch=True)
     return r[0] if r else None
-
 def teacher_login(username, password):
     r = execute("SELECT * FROM teachers WHERE username=%s", (username,), fetch=True)
     if not r:
