@@ -12,7 +12,6 @@ def student_view(prn):
 def get_student_by_prn(prn):
     result = execute("SELECT * FROM students WHERE prn = %s", (prn,), fetch=True)
     return result[0] if result else None
-
 def get_student_statistics(prn):
     student = get_student_by_prn(prn)
     if not student:
