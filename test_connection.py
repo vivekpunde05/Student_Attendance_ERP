@@ -23,7 +23,6 @@ def test_connection():
         cursor.execute("SELECT DATABASE()")
         db = cursor.fetchone()
         print(f"✓ Connected to database: {db[0]}")
-        
         cursor.close()
         conn.close()
         return True
