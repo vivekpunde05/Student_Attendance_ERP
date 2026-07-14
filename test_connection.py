@@ -19,7 +19,6 @@ def test_connection():
         version = cursor.fetchone()
         print(f"✓ Connection successful!")
         print(f"✓ MySQL version: {version[0]}")
-        
         cursor.execute("SELECT DATABASE()")
         db = cursor.fetchone()
         print(f"✓ Connected to database: {db[0]}")
