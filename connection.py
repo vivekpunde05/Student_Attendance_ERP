@@ -18,6 +18,7 @@ def get_conn():
     if _pool is None:
         init_pool()
     return _pool.get_connection()
+
 def execute(query, params=None, fetch=False, many=False, commit=False):
     conn = get_conn()
     cursor = conn.cursor(dictionary=True)
