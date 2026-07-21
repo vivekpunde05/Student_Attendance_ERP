@@ -13,7 +13,6 @@ try:
     print("✓ reset_expires added")
 except Exception as e:
     print(f"reset_expires exists: {e}")
-
 print("Verifying teachers reset columns...")
 result = execute("DESCRIBE teachers", fetch=True)
 for row in result:
