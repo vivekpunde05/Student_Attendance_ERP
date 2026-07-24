@@ -123,7 +123,6 @@ def get_teacher_statistics(teacher_id):
         "SELECT COUNT(DISTINCT date) as count FROM attendance WHERE teacher_id = %s",
         (teacher_id,), fetch=True
     )
-
     attendance_records = execute(
         "SELECT COUNT(*) as total, SUM(CASE WHEN status='present' THEN 1 ELSE 0 END) as present FROM attendance WHERE teacher_id = %s",
         (teacher_id,), fetch=True
