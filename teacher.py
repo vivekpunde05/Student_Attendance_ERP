@@ -132,8 +132,7 @@ def get_teacher_statistics(teacher_id):
     total = attendance_records[0]['total'] if attendance_records else 0
     present = attendance_records[0]['present'] if attendance_records else 0
     avg_attendance = round((present / total * 100), 2) if total > 0 else 0
-    return 
-    {
+    return {
         'students': students[0]['count'] if students else 0,
         'classes': unique_dates[0]['count'] if unique_dates else 0,
         'avg_attendance': avg_attendance
