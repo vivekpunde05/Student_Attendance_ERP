@@ -118,7 +118,6 @@ def change_teacher_password(teacher_id: int, new_password: str):
 
 def get_teacher_statistics(teacher_id):
     students = execute("SELECT COUNT(*) as count FROM students", fetch=True)
-
     unique_dates = execute(
         "SELECT COUNT(DISTINCT date) as count FROM attendance WHERE teacher_id = %s",
         (teacher_id,), fetch=True
