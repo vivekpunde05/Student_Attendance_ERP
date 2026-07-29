@@ -127,7 +127,6 @@ def get_teacher_statistics(teacher_id):
         "SELECT COUNT(*) as total, SUM(CASE WHEN status='present' THEN 1 ELSE 0 END) as present FROM attendance WHERE teacher_id = %s",
         (teacher_id,), fetch=True
     )
-
     total = attendance_records[0]['total'] if attendance_records else 0
     present = attendance_records[0]['present'] if attendance_records else 0
     avg_attendance = round((present / total * 100), 2) if total > 0 else 0
