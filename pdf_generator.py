@@ -221,8 +221,6 @@ def generate_attendance_pdf(data, teacher_name, subject, output_path):
         ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
     ]))
     story.append(summary_table)
-
-
     # Footer note
     story.append(Spacer(1, 20))
     footer_style = ParagraphStyle(
