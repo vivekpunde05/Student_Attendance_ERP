@@ -70,7 +70,6 @@ def admin_menu(admin):
         elif ch == '8':
             tid = int(input("Enter Teacher ID: "))
             summary = overall_attendance_summary(tid)
-
             print("\n--- Attendance Summary ---")
             for sid, data in summary.items():
                 print(f"\nStudent: {data['serial_no']} - {data['name']} (PRN:{data['prn']})")
