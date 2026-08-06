@@ -13,7 +13,7 @@ def init_pool(pool_size=3):
             pool_reset_session=True,
             **DB_CONFIG
         )  
-        
+
 def get_conn():
     global _pool
     if _pool is None:
@@ -34,6 +34,7 @@ def execute(query, params=None, fetch=False, many=False, commit=False):
         if commit:
             conn.commit()
         return result
+
     
     finally:
         cursor.close()
