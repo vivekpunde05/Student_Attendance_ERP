@@ -8,7 +8,6 @@ try:
     
 except Exception as e:
     print(f"reset_token exists: {e}")
-
 try:
     execute("ALTER TABLE teachers ADD COLUMN reset_expires DATETIME NULL", commit=True)
     print("✓ reset_expires added")
