@@ -17,6 +17,7 @@ except Exception as e:
 print("Verifying teachers reset columns...")
 result = execute("DESCRIBE teachers", fetch=True)
 
+
 for row in result:
     if 'reset' in row['Field'].lower():
         print(f"✓ {row['Field']}: {row['Type']}")
