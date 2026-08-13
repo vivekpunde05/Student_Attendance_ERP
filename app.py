@@ -429,11 +429,9 @@ def student_dashboard():
     prn = session['prn']
     selected_subject = request.args.get('subject', 'all')
     selected_session = request.args.get('session_type', 'all')
-
     # Resolve filters
     subject_filter = None if selected_subject == 'all' else selected_subject
     session_filter = None if selected_session == 'all' else selected_session
-
     # Fetch data
     subjects = get_student_subjects(prn)
     records = get_student_attendance_filtered(prn, subject=subject_filter, session_type=session_filter)
