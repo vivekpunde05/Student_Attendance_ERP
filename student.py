@@ -92,7 +92,6 @@ def get_student_statistics_by_subject(prn, subject=None):
         params = (prn,)
 
     records = execute(q, params, fetch=True)
-
     stats = {}
     grand_total = {
         'theory': {'total': 0, 'present': 0, 'percentage': 0},
