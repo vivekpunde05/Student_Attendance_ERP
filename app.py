@@ -438,7 +438,6 @@ def student_dashboard():
     raw_subject_stats = get_student_statistics_by_subject(prn, subject=subject_filter)
     grand_total = raw_subject_stats.pop('__grand_total__', None) if raw_subject_stats else None
     subject_stats = raw_subject_stats if raw_subject_stats else None
-
     # Fallback to basic stats if no subject-level data
     basic_stats = get_student_statistics(prn) if not subject_stats else None
 
