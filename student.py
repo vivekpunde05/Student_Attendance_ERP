@@ -140,8 +140,6 @@ def get_student_statistics_by_subject(prn, subject=None):
 
     stats['__grand_total__'] = grand_total
     return stats
-
-
 def get_student_attendance_filtered(prn, subject=None, session_type=None):
     """
     Return attendance records filtered by subject and/or session_type.
