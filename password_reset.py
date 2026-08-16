@@ -55,7 +55,6 @@ def store_reset_token(email: str, token: str, user_type: str, user_id: int, expi
         commit=True
     )
 
-
 def get_token_record(token: str):
     """Get token record by token string"""
     result = execute(
