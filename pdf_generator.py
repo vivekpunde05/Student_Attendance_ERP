@@ -208,7 +208,6 @@ def generate_attendance_pdf(data, teacher_name, subject, output_path):
         [Paragraph("<b>Average Attendance</b>", cell_style), Paragraph(_safe(f"{avg_pct}%"), cell_style)],
         [Paragraph("<b>Students with Low Attendance (<50%)</b>", red_cell_style), Paragraph(_safe(low_attendance_count), red_cell_style)],
     ]
-    
     summary_table = Table(summary_data, colWidths=[6 * cm, 3 * cm])
     summary_table.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
