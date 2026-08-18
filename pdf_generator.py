@@ -34,7 +34,6 @@ def generate_attendance_pdf(data, teacher_name, subject, output_path):
         topMargin=2 * cm,
         bottomMargin=1.5 * cm,
     )
-
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         "CustomTitle",
