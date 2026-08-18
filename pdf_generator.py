@@ -13,7 +13,6 @@ from reportlab.platypus import (
     SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
 )
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-
 def _safe(text):
     """Escape text for ReportLab Paragraph XML parsing."""
     return html.escape(str(text))
