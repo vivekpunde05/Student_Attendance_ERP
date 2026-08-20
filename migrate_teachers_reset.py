@@ -11,7 +11,6 @@ except Exception as e:
 try:
     execute("ALTER TABLE teachers ADD COLUMN reset_expires DATETIME NULL", commit=True)
     print("✓ reset_expires added")
-
 except Exception as e:
     print(f"reset_expires exists: {e}")
 print("Verifying teachers reset columns...")
