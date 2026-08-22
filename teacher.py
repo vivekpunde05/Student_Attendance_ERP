@@ -107,7 +107,6 @@ def overall_attendance_summary(teacher_id, class_name=None):
             "percentage": percentage
         }
     return summary
-
 def change_teacher_password(teacher_id: int, new_password: str):
     """Allow teacher to change their own password"""
     is_valid, error = utils.validate_password_length(new_password)
